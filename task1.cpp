@@ -16,7 +16,7 @@ const int MAX = 500;
 Parcel parcels[MAX];
 int front = -1;
 int rear = -1;
-int size = 0;
+int parcelCount = 0;
 
 bool isFull() { return rear == MAX - 1; }
 bool isEmpty() { return front == -1 || front > rear; }
@@ -29,9 +29,10 @@ void enqueue(Parcel parcel) {
   if (isEmpty()) {
     front = 0;
   }
-  ++rear;
+  rear = (rear + 1) % MAX;
   parcels[rear] = parcel;
   parcel.parcelID = rear;
+  parcelCount++;
   cout << "Added parcel into queue" << endl;
 }
 
@@ -41,7 +42,12 @@ void dequeue() {
     return;
   }
   cout << "Parcel " << parcels[front].parcelID << " is being served.\n";
-  front++;
+  parcelCount--;
+  if (front == rear) {
+    front = rear = -1;
+  } else {
+    front = (front + 1) % MAX;
+  }
 }
 
 void registerNewParcel(string recipientName, string recipientID,
