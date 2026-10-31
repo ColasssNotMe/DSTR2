@@ -10,7 +10,9 @@ void menu() {
     cout << setw(10) << " " << "Main Menu" << endl;
     cout << string(30, '=') << endl;
 
+    // question 1
     cout << "1. Display All Parcel" << endl;
+    // question 2
     cout << "2. Search Parcel" << endl;
     cout << "3. View Parcel Detail" << endl;
     cout << "0. Exit" << endl;
