@@ -1,8 +1,8 @@
-#include <iostream>
-#include <iomanip>
-#include <string>
 #include "task1.h"
 #include "task2.h"
+#include <iomanip>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -103,7 +103,7 @@ void option7Menu() {
 
   cout << "Enter Target Parcel ID: ";
   cin >> parcelID;
-  cin.ignore(); 
+  cin.ignore();
 
   cout << "Select Service Type:\n";
   cout << "1. Campus Delivery\n";
@@ -116,15 +116,27 @@ void option7Menu() {
   cin.ignore();
 
   switch (choice) {
-    case 1: serviceType = "Campus Delivery"; priorityLevel = 2; break;
-    case 2: serviceType = "Special Handling"; priorityLevel = 1; break;
-    case 3: serviceType = "Recipient Collection"; priorityLevel = 3; break;
-    case 4: serviceType = "Return to Sender"; priorityLevel = 1; break;
-    default:
-      cout << "Invalid choice. Setting default: Campus Delivery.\n";
-      serviceType = "Campus Delivery";
-      priorityLevel = 2;
-      break;
+  case 1:
+    serviceType = "Campus Delivery";
+    priorityLevel = 2;
+    break;
+  case 2:
+    serviceType = "Special Handling";
+    priorityLevel = 1;
+    break;
+  case 3:
+    serviceType = "Recipient Collection";
+    priorityLevel = 3;
+    break;
+  case 4:
+    serviceType = "Return to Sender";
+    priorityLevel = 1;
+    break;
+  default:
+    cout << "Invalid choice. Setting default: Campus Delivery.\n";
+    serviceType = "Campus Delivery";
+    priorityLevel = 2;
+    break;
   }
 
   cout << "Enter Request Date/Time (e.g. 2026-11-05 10:00): ";
@@ -134,8 +146,10 @@ void option7Menu() {
 }
 
 void seedInitialData() {
-  registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00", "Received");
-  registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document", "2026-11-05 08:30", "Received");
+  registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00",
+                    "Received");
+  registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document",
+                    "2026-11-05 08:30", "Received");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
 }
 
@@ -147,13 +161,12 @@ void menu() {
     cout << setw(12) << " " << "Main Menu" << endl;
     cout << string(35, '=') << endl;
 
-    //question 1 
+    // question 1
     cout << "1. Display All Parcels" << endl;
-    //question 2
+    // question 2
     cout << "2. Search Parcel" << endl;
     cout << "3. View Parcel Detail" << endl;
     cout << "4. Sort & Process Incoming Parcel" << endl;
-    // TODO: havent do 5
     cout << "5. Update Parcel Record" << endl;
     cout << "6. Delete Parcel Record" << endl;
     cout << "7. [Task 2] Create Service Request" << endl;
@@ -164,34 +177,34 @@ void menu() {
     cin >> selection;
 
     switch (selection) {
-      case 1:
-        option1Menu();
-        break;
-      case 2:
-        option2Menu();
-        break;
-      case 3:
-        option3Menu();
-        break;
-      case 4:
-        processParcel();
-        break;
-      case 5:
-        option5Menu();
-        break;
-      case 6:
-        option6Menu();
-        break;
-      case 7:
-        option7Menu();
-        break;
-      case 0:
-        return;
-      default:
-        cout << "Invalid selection. Please try again.\n";
-        break;
+    case 1:
+      option1Menu();
+      break;
+    case 2:
+      option2Menu();
+      break;
+    case 3:
+      option3Menu();
+      break;
+    case 4:
+      processParcel();
+      break;
+    case 5:
+      option5Menu();
+      break;
+    case 6:
+      option6Menu();
+      break;
+    case 7:
+      option7Menu();
+      break;
+    case 0:
+      return;
+    default:
+      cout << "Invalid selection. Please try again.\n";
+      break;
     }
   }
 }
 
-int main() { menu();}
+int main() { menu(); }

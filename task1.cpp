@@ -195,8 +195,6 @@ void displayAllParcel(Queue queue) {
   }
 }
 
-// FIXME: create another function to store the real parcel, this function only
-// save the all the matching result to the array.
 void searchAllMatchingParcel(string searchTerm, int field) {
   int count = 0;
   switch (field) {
