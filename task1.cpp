@@ -1,3 +1,4 @@
+// FIXME: search using name
 #include "iostream"
 #include <algorithm>
 #include <exception>
@@ -22,9 +23,9 @@ public:
 
 struct Queue {
   Parcel parcels[MAX];
-  int front;
-  int rear;
-  int count;
+  int front = -1;
+  int rear = -1;
+  int count = 0;
 };
 
 Queue normalParcels;
@@ -35,7 +36,8 @@ Queue toBeCollectParcel;
 Queue returnedParcel;
 Queue onHoldInvestigaton;
 
-Queue *allQueue[] = {&normalParcels, &toBeCollectParcel, &toBeDelivered,
+Queue *allQueue[] = {&normalParcels,      &toBeCollectParcel,
+                     &toBeDelivered,      &toBeSpecialHandling,
                      &onHoldInvestigaton, &returnedParcel};
 
 Parcel result[MAX];
@@ -53,7 +55,6 @@ void enqueue(Parcel parcel, Queue &queue) {
   }
   queue.rear = (queue.rear + 1) % MAX;
   queue.parcels[queue.rear] = parcel;
-  parcel.parcelID = queue.rear;
   queue.count++;
   cout << "Added parcel into queue" << endl;
 }
@@ -73,60 +74,59 @@ void dequeue(Queue &queue) {
   }
 }
 
-void removeParcel(Queue &queue, string parcelID) {
+bool removeParcel(Queue &queue, int parcelID) {
   if (isEmpty(queue)) {
-    cout << "Queue is Empty! Unable to remove parcel." << endl;
-    return;
+    return false;
   }
 
-  try {
-    stoi(parcelID);
-  } catch (exception e) {
-    cerr << "Error converting parcel ID to integer" << endl;
-    return;
-  }
-
-  bool foundIndex = false;
-  for (int i = queue.front;; i = (i + 1) % MAX) {
-    if (!foundIndex) {
-      if (queue.parcels[i].parcelID == stoi(parcelID)) {
-        queue.parcels[i] = Parcel{};
-        queue.count--;
-        foundIndex = true;
-
-        // Shift forward
-        int current = i;
-        while (current != queue.rear) {
-          int next = (current + 1) % MAX;
-          queue.parcels[current] = queue.parcels[next];
-          current = next;
-        }
-        queue.parcels[queue.rear] = Parcel{};
-
-        if (queue.front == queue.rear) {
-          queue.front = queue.rear = -1;
-        } else {
-          queue.front = (queue.front + 1) % MAX;
-        }
-
-        queue.count--;
-        break;
+  int current = queue.front;
+  for (int i = 0; i < queue.count; i++) {
+    if (queue.parcels[current].parcelID == parcelID) {
+      int next = (current + 1) % MAX;
+      while (current != queue.rear) {
+        queue.parcels[current] = queue.parcels[next];
+        current = next;
+        next = (next + 1) % MAX;
       }
+      queue.parcels[queue.rear] = Parcel{};
+      queue.count--;
+
+      if (queue.count == 0) {
+        queue.front = -1;
+        queue.rear = -1;
+      } else {
+        queue.rear = (queue.rear - 1 + MAX) % MAX;
+      }
+      return true;
     }
-    if (i == queue.rear) {
-      break;
+    current = (current + 1) % MAX;
+  }
+  return false;
+}
+
+Queue *findParcelQueue(int parcelID) {
+  for (int i = 0; i < 6; i++) {
+    Queue *currentQueue = allQueue[i];
+    int j = currentQueue->front;
+    for (int count = 0; count < currentQueue->count; count++) {
+      if (currentQueue->parcels[j].parcelID == parcelID) {
+        return currentQueue;
+      }
+      j = (j + 1) % MAX;
     }
   }
-  if (!foundIndex) {
-    cout << "Parcel not found!" << endl;
-  }
+  return nullptr;
 }
 
 // question 1
 void registerNewParcel(string recipientName, string recipientID,
                        string deliveryCompany, string parcelType,
-                       string arrivalDateTime, string status) {
-  // Q5 validation
+                       string arrivalDateTime, string status = "Sorting") {
+
+  if (status.empty()) {
+    status = "Sorting";
+  }
+
   // TODO: verify the data if exist or smtg instead of just empty value
   if (recipientName == "") {
     cout << "Invalid Recipient Name" << endl;
@@ -159,6 +159,8 @@ void registerNewParcel(string recipientName, string recipientID,
   parcelToBeAdd.recipientID = recipientID;
   parcelToBeAdd.deliveryCompany = deliveryCompany;
   parcelToBeAdd.parcelType = parcelType;
+  parcelToBeAdd.arrivalDateTime = arrivalDateTime;
+  parcelToBeAdd.status = status;
   enqueue(parcelToBeAdd, normalParcels);
   cout << "Parcel added with Parcel ID: " << parcelToBeAdd.parcelID << endl;
   // FIXME: impossible for id duplicate
@@ -196,116 +198,119 @@ void displayAllParcel(Queue queue) {
 }
 
 void searchAllMatchingParcel(string searchTerm, int field) {
-  int count = 0;
-  switch (field) {
-  case 1:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        int parcelID;
-        try {
-          parcelID = stoi(searchTerm);
-        } catch (exception e) {
-          cerr << "Error while attempting to convert search term to parcel ID"
-               << endl;
-          return;
-        }
-        if (currentLoopParcel.parcelID == parcelID) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
+  int searchID = -1;
+  if (field == 1) {
+    try {
+      searchID = stoi(searchTerm);
+    } catch (const exception &e) {
+      cout << "Invalid Parcel ID." << endl;
+      return;
     }
-    break;
-  case 2:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        if (currentLoopParcel.recipientID == searchTerm) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
-    }
-    break;
-  case 3:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        if (currentLoopParcel.recipientName == searchTerm) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
-    }
-    break;
-  case 4:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        if (currentLoopParcel.deliveryCompany == searchTerm) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
-    }
-    break;
-
-  case 5:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        if (currentLoopParcel.parcelType == searchTerm) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
-    }
-    break;
-  case 6:
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < allQueue[i]->count; j++) {
-        Parcel currentLoopParcel = allQueue[i]->parcels[j];
-        if (currentLoopParcel.status == searchTerm) {
-          result[count] = currentLoopParcel;
-          i++;
-        }
-      }
-    }
-    break;
-
-  default:
-    cout << "Invalid search term" << endl;
   }
 
-  // NOTE: the return result is in result[]
+  int count = 0;
+
+  cout << endl;
+  cout << left << setw(10) << "ID" << setw(25) << "Recipient Name" << setw(15)
+       << "Recipient ID" << setw(20) << "Delivery Company" << setw(15)
+       << "Parcel Type" << setw(25) << "Arrival Date/Time" << setw(15)
+       << "Status" << endl;
+
+  cout << string(125, '-') << endl;
+  for (int i = 0; i < 6; i++) {
+    Queue *currentQueue = allQueue[i];
+    if (isEmpty(*currentQueue)) {
+      continue;
+    }
+    int current = currentQueue->front;
+    for (int j = 0; j < currentQueue->count; j++) {
+      Parcel currentParcel = currentQueue->parcels[current];
+      bool matched = false;
+      switch (field) {
+      case 1:
+        matched = (currentParcel.parcelID == searchID);
+        break;
+
+      case 2:
+        matched = (currentParcel.recipientID == searchTerm);
+        break;
+
+      case 3:
+        matched = (currentParcel.recipientName == searchTerm);
+        break;
+
+      case 4:
+        matched = (currentParcel.deliveryCompany == searchTerm);
+        break;
+
+      case 5:
+        matched = (currentParcel.parcelType == searchTerm);
+        break;
+
+      case 6:
+        matched = (currentParcel.status == searchTerm);
+        break;
+
+      default:
+        cout << "Invalid search field." << endl;
+        return;
+      }
+
+      if (matched) {
+        printParcel(currentParcel);
+        count++;
+      }
+      current = (current + 1) % MAX;
+    }
+  }
+
+  if (count == 0) {
+    cout << "No parcel matches the search value." << endl;
+  } else {
+    cout << "Total matching parcels: " << count << endl;
+  }
 }
 
 void viewParcelDetail(int parcelID) {
-  Parcel selectedParcel;
+  Parcel *selectedParcel = nullptr;
   for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < allQueue[i]->count; j++) {
-      Parcel currentLoopParcel = allQueue[i]->parcels[j];
-      if (currentLoopParcel.parcelID == parcelID) {
-        selectedParcel = currentLoopParcel;
-        i++;
+    Queue *currentQueue = allQueue[i];
+    if (isEmpty(*currentQueue)) {
+      continue;
+    }
+    int current = currentQueue->front;
+    for (int j = 0; j < currentQueue->count; j++) {
+      if (currentQueue->parcels[current].parcelID == parcelID) {
+        selectedParcel = &currentQueue->parcels[current];
+        break;
       }
+      current = (current + 1) % MAX;
+    }
+    if (selectedParcel != nullptr) {
+      break;
     }
   }
 
-  cout << string("-", 50) << endl;
-  cout << "Parcel Detail" << endl;
-  cout << "ID: " << selectedParcel.parcelID << endl;
-  cout << "Type: " << selectedParcel.parcelType << endl;
-  cout << "Arrival date time: " << selectedParcel.arrivalDateTime << endl;
-  cout << "Delivery Company: " << selectedParcel.deliveryCompany << endl;
-  cout << "Recipient ID:" << selectedParcel.recipientID << endl;
-  cout << "Recipient Name:" << selectedParcel.recipientName << endl;
-  cout << "Status: " << selectedParcel.status << endl;
-  cout << string("-", 50) << endl;
+  if (selectedParcel == nullptr) {
+    cout << "Parcel with ID " << parcelID << " not found." << endl;
+    return;
+  }
+
+  cout << endl;
+  cout << string(125, '=') << endl;
+
+  cout << left << setw(10) << "ID" << setw(25) << "Recipient Name" << setw(15)
+       << "Recipient ID" << setw(20) << "Delivery Company" << setw(15)
+       << "Parcel Type" << setw(25) << "Arrival Date/Time" << setw(15)
+       << "Status" << endl;
+
+  cout << string(125, '-') << endl;
+  printParcel(*selectedParcel);
+  cout << string(125, '=') << endl;
 }
 
 void processParcel() {
+  cout << endl << endl;
   if (isEmpty(normalParcels)) {
     cout << "No parcel waiting to be process" << endl;
     return;
@@ -332,6 +337,7 @@ void processParcel() {
     enqueue(currentParcel, toBeCollectParcel);
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
+    dequeue(normalParcels);
     break;
 
   case 2:
@@ -339,6 +345,7 @@ void processParcel() {
     enqueue(currentParcel, toBeDelivered);
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
+    dequeue(normalParcels);
     break;
 
   case 3:
@@ -346,6 +353,7 @@ void processParcel() {
     enqueue(currentParcel, toBeSpecialHandling);
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
+    dequeue(normalParcels);
     break;
 
   case 4:
@@ -353,6 +361,7 @@ void processParcel() {
     enqueue(currentParcel, returnedParcel);
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
+    dequeue(normalParcels);
     break;
 
   case 5:
@@ -360,6 +369,7 @@ void processParcel() {
     enqueue(currentParcel, onHoldInvestigaton);
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
+    dequeue(normalParcels);
     break;
 
   default:
@@ -369,32 +379,57 @@ void processParcel() {
 }
 
 // Question 4
-// TODO: verify the pointer thing
 Parcel *searchSpecificParcel(string parcelID) {
-  Parcel *found;
-  int parcelIDint;
+  int id;
   try {
-    parcelIDint = stoi(parcelID);
-  } catch (exception e) {
-    cerr << "Error while attempting to convert search term to parcel ID"
-         << endl;
-    return found;
+    id = stoi(parcelID);
+  } catch (const exception &e) {
+    cout << "Invalid Parcel ID." << endl;
+    return nullptr;
   }
-
   for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < allQueue[i]->count; j++) {
-      Parcel *currentLoopParcel = &allQueue[i]->parcels[j];
-      if (currentLoopParcel->parcelID == parcelIDint) {
-        return currentLoopParcel;
+    Queue *currentQueue = allQueue[i];
+    if (isEmpty(*currentQueue)) {
+      continue;
+    }
+    int current = currentQueue->front;
+    for (int j = 0; j < currentQueue->count; j++) {
+      if (currentQueue->parcels[current].parcelID == id) {
+        return &currentQueue->parcels[current];
       }
+      current = (current + 1) % MAX;
     }
   }
-
-  cout << "No parcel with parcel ID: " << parcelID << " found" << endl;
-  return found;
+  cout << "No parcel with Parcel ID: " << parcelID << " found." << endl;
+  return nullptr;
 }
 
 void updateParcel(string parcelID) {
+  int id;
+
+  try {
+    id = stoi(parcelID);
+  } catch (const exception &e) {
+    cout << "Invalid Parcel ID" << endl;
+    return;
+  }
+
+  Queue *originalQueue = findParcelQueue(id);
+  if (originalQueue == nullptr) {
+    cout << "Parcel not found!" << endl;
+    return;
+  }
+  Parcel updatedParcel;
+  int current = originalQueue->front;
+  for (int i = 0; i < originalQueue->count; i++) {
+    if (originalQueue->parcels[current].parcelID == id) {
+      updatedParcel = originalQueue->parcels[current];
+      break;
+    }
+    current = (current + 1) % MAX;
+  }
+
+  cout << endl << endl;
   cout << "Select parcel status to update: " << endl;
   cout << "1. Collection" << endl;
   cout << "2. Delivery" << endl;
@@ -404,45 +439,63 @@ void updateParcel(string parcelID) {
   cout << "6. Cancellation" << endl;
   cout << "0. Return to main menu" << endl;
 
+  cout << "Enter selection: ";
+
   int selection;
   cin >> selection;
 
-  Parcel *tobeModify;
+  Queue *destinationQueue = nullptr;
+
   switch (selection) {
   case 1:
-    tobeModify = searchSpecificParcel(parcelID);
-    tobeModify->status = "Collection";
-    cout << "Successfully update status of " << parcelID << endl;
+    updatedParcel.status = "Awaiting Collection";
+    destinationQueue = &toBeCollectParcel;
     break;
 
   case 2:
-    tobeModify = searchSpecificParcel(parcelID);
-    tobeModify->status = "Delivery";
-    cout << "Successfully update status of " << parcelID << endl;
+    updatedParcel.status = "Out for Delivery";
+    destinationQueue = &toBeDelivered;
     break;
 
   case 3:
-    tobeModify = searchSpecificParcel(parcelID);
-    tobeModify->status = "Return";
-    cout << "Successfully update status of " << parcelID << endl;
+    updatedParcel.status = "Special Handling";
+    destinationQueue = &toBeSpecialHandling;
     break;
+
   case 4:
-    tobeModify = searchSpecificParcel(parcelID);
-    tobeModify->status = "Cancellation";
-    cout << "Successfully update status of " << parcelID << endl;
+    updatedParcel.status = "On Hold";
+    destinationQueue = &onHoldInvestigaton;
     break;
+
+  case 5:
+    updatedParcel.status = "Return to Sender";
+    destinationQueue = &returnedParcel;
+    break;
+
+  case 6:
+    if (removeParcel(*originalQueue, id)) {
+      cout << "Parcel " << id << " successfully cancelled." << endl;
+    }
+    return;
+
+  case 0:
+    return;
 
   default:
-    cout << "Invalid selection, returning to main menu" << endl;
+    cout << "Invalid selection." << endl;
     return;
   }
-}
 
-// TODO:
-void removeParcel(string parcelID) {
-  Parcel *parcelToBeRemoved;
+  if (isFull(*destinationQueue)) {
+    cout << "Destination queue is full. Unable to update parcel." << endl;
+    return;
+  }
 
-  parcelToBeRemoved = searchSpecificParcel(parcelID);
+  if (removeParcel(*originalQueue, id)) {
+    enqueue(updatedParcel, *destinationQueue);
+    cout << "Successfully updated parcel " << id << " to "
+         << updatedParcel.status << endl;
+  }
 }
 
 // Question 5

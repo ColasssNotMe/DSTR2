@@ -7,45 +7,51 @@
 using namespace std;
 
 void option1Menu() {
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "Unprocessed Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(normalParcels);
+  cout << endl << endl;
 
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "To Be Collect Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(toBeCollectParcel);
+  cout << endl << endl;
 
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "To Be Deliver Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(toBeDelivered);
+  cout << endl << endl;
 
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "To Be Special Handling Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(toBeSpecialHandling);
+  cout << endl << endl;
 
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "On Hold For Investigation Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(onHoldInvestigaton);
+  cout << endl << endl;
 
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   cout << "Waiting For Return Parcel" << endl;
-  cout << string(50, '-') << endl;
+  cout << string(50, '=') << endl;
   displayAllParcel(returnedParcel);
+  cout << endl << endl;
 }
 
 void option2Menu() {
   int searchSelection;
 
+  cout << endl << endl;
   while (true) {
     cout << "Search By:" << endl;
     cout << "1. Parcel ID" << endl;
     cout << "2. Recipient ID" << endl;
-    cout << "3. Recipient Name" << endl;
     cout << "4. Delivery Company" << endl;
     cout << "5. Parcel Type" << endl;
     cout << "6. Status" << endl;
@@ -81,9 +87,16 @@ void option3Menu() {
 
 void option5Menu() {
   string parcelID;
+
   cout << "Enter Parcel ID to update: " << endl;
   cin >> parcelID;
-  updateParcel(parcelID);
+  bool haveParcel = searchSpecificParcel(parcelID) != nullptr ? true : false;
+  if (haveParcel) {
+    updateParcel(parcelID);
+  } else {
+    cout << "Invalid Parcel ID" << endl << endl;
+    return;
+  }
 }
 
 void option6Menu() {
@@ -93,63 +106,66 @@ void option6Menu() {
   removeParcel(parcelID);
 }
 
-void option7Menu() {
-  cout << string(50, '-') << endl;
-  cout << "Create Service Request" << endl;
-  cout << string(50, '-') << endl;
+// END OF TASK 1
 
-  int parcelID, priorityLevel;
-  string serviceType, requestDateTime;
-
-  cout << "Enter Target Parcel ID: ";
-  cin >> parcelID;
-  cin.ignore();
-
-  cout << "Select Service Type:\n";
-  cout << "1. Campus Delivery\n";
-  cout << "2. Special Handling\n";
-  cout << "3. Recipient Collection\n";
-  cout << "4. Return to Sender\n";
-  cout << "Enter choice (1-4): ";
-  int choice;
-  cin >> choice;
-  cin.ignore();
-
-  switch (choice) {
-  case 1:
-    serviceType = "Campus Delivery";
-    priorityLevel = 2;
-    break;
-  case 2:
-    serviceType = "Special Handling";
-    priorityLevel = 1;
-    break;
-  case 3:
-    serviceType = "Recipient Collection";
-    priorityLevel = 3;
-    break;
-  case 4:
-    serviceType = "Return to Sender";
-    priorityLevel = 1;
-    break;
-  default:
-    cout << "Invalid choice. Setting default: Campus Delivery.\n";
-    serviceType = "Campus Delivery";
-    priorityLevel = 2;
-    break;
-  }
-
-  cout << "Enter Request Date/Time (e.g. 2026-11-05 10:00): ";
-  getline(cin, requestDateTime);
-
-  createServiceRequest(parcelID, serviceType, priorityLevel, requestDateTime);
-}
+// void option7Menu() {
+//   cout << string(50, '-') << endl;
+//   cout << "Create Service Request" << endl;
+//   cout << string(50, '-') << endl;
+//
+//   int parcelID, priorityLevel;
+//   string serviceType, requestDateTime;
+//
+//   cout << "Enter Target Parcel ID: ";
+//   cin >> parcelID;
+//   cin.ignore();
+//
+//   cout << "Select Service Type:\n";
+//   cout << "1. Campus Delivery\n";
+//   cout << "2. Special Handling\n";
+//   cout << "3. Recipient Collection\n";
+//   cout << "4. Return to Sender\n";
+//   cout << "Enter choice (1-4): ";
+//   int choice;
+//   cin >> choice;
+//   cin.ignore();
+//
+//   switch (choice) {
+//   case 1:
+//     serviceType = "Campus Delivery";
+//     priorityLevel = 2;
+//     break;
+//   case 2:
+//     serviceType = "Special Handling";
+//     priorityLevel = 1;
+//     break;
+//   case 3:
+//     serviceType = "Recipient Collection";
+//     priorityLevel = 3;
+//     break;
+//   case 4:
+//     serviceType = "Return to Sender";
+//     priorityLevel = 1;
+//     break;
+//   default:
+//     cout << "Invalid choice. Setting default: Campus Delivery.\n";
+//     serviceType = "Campus Delivery";
+//     priorityLevel = 2;
+//     break;
+//   }
+//
+//   cout << "Enter Request Date/Time (e.g. 2026-11-05 10:00): ";
+//   getline(cin, requestDateTime);
+//
+//   createServiceRequest(parcelID, serviceType, priorityLevel,
+//   requestDateTime);
+// }
 
 void seedInitialData() {
   registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00",
-                    "Received");
+                    "");
   registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document",
-                    "2026-11-05 08:30", "Received");
+                    "2026-11-05 08:30", "");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
 }
 
@@ -157,6 +173,7 @@ void menu() {
   seedInitialData();
 
   while (true) {
+    cout << endl << endl;
     cout << string(35, '=') << endl;
     cout << setw(12) << " " << "Main Menu" << endl;
     cout << string(35, '=') << endl;
@@ -196,7 +213,7 @@ void menu() {
       option6Menu();
       break;
     case 7:
-      option7Menu();
+      // option7Menu();
       break;
     case 0:
       return;

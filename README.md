@@ -12,6 +12,7 @@ string status;
 
 > ## Parcel Status
 
+0. Sorting
 1. Collection
 2. Delivery
 3. Special Handling
