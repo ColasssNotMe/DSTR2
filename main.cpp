@@ -1,5 +1,6 @@
 #include "task1.h"
-#include "task2.h"
+// #include "task2.h"
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -100,10 +101,29 @@ void option5Menu() {
 }
 
 void option6Menu() {
-  string parcelID;
+  string parcelIDInput;
   cout << "Enter Parcel ID to delete: " << endl;
-  cin >> parcelID;
-  removeParcel(parcelID);
+  cin >> parcelIDInput;
+
+  int parcelID;
+  try {
+    parcelID = stoi(parcelIDInput);
+  } catch (exception e) {
+    cout << "Invalid Parcel ID" << endl;
+    return;
+  }
+
+  Queue *parcelQueue = findParcelQueue(parcelID);
+  if (parcelQueue == nullptr) {
+    cout << "Parcel with ID " << parcelID << " not found." << endl;
+    return;
+  }
+
+  if (removeParcel(*parcelQueue, parcelID)) {
+    cout << "Parcel " << parcelID << " successfully deleted." << endl;
+  } else {
+    cout << "Failed to delete parcel " << parcelID << "." << endl;
+  }
 }
 
 // END OF TASK 1
