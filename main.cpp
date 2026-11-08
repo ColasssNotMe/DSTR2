@@ -1,5 +1,5 @@
 #include "task1.h"
-// #include "task2.h"
+#include "task2.h"
 #include "task3.h"
 #include "task4.h"
 #include <exception>
@@ -128,65 +128,121 @@ void option6Menu() {
   }
 }
 
-// END OF TASK 1
+// ================= TASK 2 SUBMENU =================
 
-// void option7Menu() {
-//   cout << string(50, '-') << endl;
-//   cout << "Create Service Request" << endl;
-//   cout << string(50, '-') << endl;
-//
-//   int parcelID, priorityLevel;
-//   string serviceType, requestDateTime;
-//
-//   cout << "Enter Target Parcel ID: ";
-//   cin >> parcelID;
-//   cin.ignore();
-//
-//   cout << "Select Service Type:\n";
-//   cout << "1. Campus Delivery\n";
-//   cout << "2. Special Handling\n";
-//   cout << "3. Recipient Collection\n";
-//   cout << "4. Return to Sender\n";
-//   cout << "Enter choice (1-4): ";
-//   int choice;
-//   cin >> choice;
-//   cin.ignore();
-//
-//   switch (choice) {
-//   case 1:
-//     serviceType = "Campus Delivery";
-//     priorityLevel = 2;
-//     break;
-//   case 2:
-//     serviceType = "Special Handling";
-//     priorityLevel = 1;
-//     break;
-//   case 3:
-//     serviceType = "Recipient Collection";
-//     priorityLevel = 3;
-//     break;
-//   case 4:
-//     serviceType = "Return to Sender";
-//     priorityLevel = 1;
-//     break;
-//   default:
-//     cout << "Invalid choice. Setting default: Campus Delivery.\n";
-//     serviceType = "Campus Delivery";
-//     priorityLevel = 2;
-//     break;
-//   }
-//
-//   cout << "Enter Request Date/Time (e.g. 2026-11-05 10:00): ";
-//   getline(cin, requestDateTime);
-//
-//   createServiceRequest(parcelID, serviceType, priorityLevel,
-//   requestDateTime);
-// }
+void option7Menu_Create() {
+  cout << "\n" << string(40, '-') << endl;
+  cout << "  Create Service Request" << endl;
+  cout << string(40, '-') << endl;
 
+  int parcelID, priorityLevel;
+  string serviceType, requestDateTime;
+
+  cout << "Enter Target Parcel ID: ";
+  cin >> parcelID;
+  cin.ignore();
+
+  cout << "\nSelect Service Type:\n";
+  cout << "1. Special Handling (Priority 1 - High)\n";
+  cout << "2. Return to Sender (Priority 1 - High)\n";
+  cout << "3. Campus Delivery (Priority 2 - Medium)\n";
+  cout << "4. Recipient Collection (Priority 3 - Low)\n";
+  cout << "Enter choice (1-4): ";
+  int choice;
+  cin >> choice;
+  cin.ignore();
+
+  switch (choice) {
+  case 1:
+    serviceType = "Special Handling";
+    priorityLevel = 1;
+    break;
+  case 2:
+    serviceType = "Return to Sender";
+    priorityLevel = 1;
+    break;
+  case 3:
+    serviceType = "Campus Delivery";
+    priorityLevel = 2;
+    break;
+  case 4:
+    serviceType = "Recipient Collection";
+    priorityLevel = 3;
+    break;
+  default:
+    cout << "Invalid choice. Setting default: Campus Delivery.\n";
+    serviceType = "Campus Delivery";
+    priorityLevel = 2;
+    break;
+  }
+
+  cout << "Enter Request Date/Time (e.g. 2026-11-09 10:00): ";
+  getline(cin, requestDateTime);
+
+  createServiceRequest(parcelID, serviceType, priorityLevel, requestDateTime);
+}
+
+void option7Menu() {
+  int selection;
+  while (true) {
+    cout << "\n" << string(45, '=') << endl;
+    cout << "  Task 2: Service Request Management" << endl;
+    cout << string(45, '=') << endl;
+    cout << "1. Create Service Request" << endl;
+    cout << "2. Display Active Service Requests" << endl;
+    cout << "3. Determine & View Next Request to Handle" << endl;
+    cout << "4. Process Service Request (Complete)" << endl;
+    cout << "5. Cancel Service Request" << endl;
+    cout << "0. Back to Main Menu" << endl;
+
+    cout << "Enter selection: ";
+    cin >> selection;
+
+    switch (selection) {
+    case 1:
+      option7Menu_Create();
+      break;
+    case 2:
+      displayActiveRequests();
+      break;
+    case 3: {
+      ServiceRequest* nextReq = getNextRequest();
+      if (nextReq != nullptr) {
+        cout << "\n--- NEXT REQUEST TO PROCESS (Highest Priority) ---\n";
+        cout << "Request ID : " << nextReq->requestID << endl;
+        cout << "Parcel ID  : " << nextReq->parcelID << endl;
+        cout << "Recipient  : " << nextReq->recipientName << endl;
+        cout << "Service    : " << nextReq->serviceType << endl;
+        cout << "Priority   : " << nextReq->priorityLevel << endl;
+        cout << "--------------------------------------------------\n";
+      }
+      break;
+    }
+    case 4: {
+      int reqID;
+      cout << "\nEnter Request ID to Complete: ";
+      cin >> reqID;
+      processServiceRequest(reqID, "Completed");
+      break;
+    }
+    case 5: {
+      int reqID;
+      cout << "\nEnter Request ID to Cancel: ";
+      cin >> reqID;
+      cancelServiceRequest(reqID);
+      break;
+    }
+    case 0:
+      return;
+    default:
+      cout << "Invalid selection. Please try again.\n";
+      break;
+    }
+  }
+}
 
 // ================= TASK 3 =================
 
-// Q1: Register Resource
 void optionResource1() {
     int choice;
 
@@ -212,16 +268,12 @@ void optionResource1() {
     }
 }
 
-
-// Q2: Display Resources
 void optionResource2() {
     cout << "\n========== Resource Availability ==========\n";
-
     displayAllResources();
 }
 
 void optionResource3() {
-
     int choice;
 
     cout << "\n========== ASSIGN RESOURCE ==========\n";
@@ -233,26 +285,20 @@ void optionResource3() {
     cin >> choice;
 
     switch (choice) {
-
     case 1:
         assignParcelMenu();
         break;
-
     case 2:
         assignReceiptMenu();
         break;
-
     case 0:
         return;
-
     default:
         cout << "Invalid selection." << endl;
         break;
     }
 }
 
-
-// Q4: Release Resource
 void optionResource4() {
     string resourceID;
 
@@ -266,8 +312,6 @@ void optionResource4() {
     }
 }
 
-
-// Set Resource Unavailable
 void optionResource5() {
     string resourceID;
 
@@ -277,8 +321,6 @@ void optionResource5() {
     setResourceUnavailable(resourceID);
 }
 
-
-// Set Resource Available
 void optionResource6() {
     string resourceID;
 
@@ -288,8 +330,6 @@ void optionResource6() {
     setResourceAvailable(resourceID);
 }
 
-
-// Resource Management Menu
 void option8Menu() {
     int selection;
 
@@ -313,30 +353,23 @@ void option8Menu() {
         case 1:
             optionResource1();
             break;
-
         case 2:
             optionResource2();
             break;
-
         case 3:
             optionResource3();
             break;
-
         case 4:
             optionResource4();
             break;
-
         case 5:
             optionResource5();
             break;
-
         case 6:
             optionResource6();
             break;
-
         case 0:
             return;
-
         default:
             cout << "Invalid selection. Please try again.\n";
             break;
@@ -345,10 +378,8 @@ void option8Menu() {
 }
 
 void seedInitialData() {
-  registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00",
-                    "");
-  registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document",
-                    "2026-11-05 08:30", "");
+  registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00", "");
+  registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document", "2026-11-05 08:30", "");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
   seedResources();
 }
@@ -362,15 +393,13 @@ void menu() {
     cout << setw(12) << " " << "Main Menu" << endl;
     cout << string(35, '=') << endl;
 
-    // question 1
     cout << "1. Display All Parcels" << endl;
-    // question 2
     cout << "2. Search Parcel" << endl;
     cout << "3. View Parcel Detail" << endl;
     cout << "4. Sort & Process Incoming Parcel" << endl;
     cout << "5. Update Parcel Record" << endl;
     cout << "6. Delete Parcel Record" << endl;
-    cout << "7. [Task 2] Create Service Request" << endl;
+    cout << "7. [Task 2] Service Request Management" << endl;
     cout << "8. [Task 3] Resource Management Module" << endl;
     cout << "9. [Task 4] Parcel Activity & Record Management" << endl;
     cout << "0. Exit" << endl;
@@ -399,7 +428,7 @@ void menu() {
       option6Menu();
       break;
     case 7:
-      // option7Menu();
+      option7Menu();
       break;
     case 8:
       option8Menu();

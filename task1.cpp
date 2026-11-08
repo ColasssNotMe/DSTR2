@@ -7,7 +7,7 @@
 #include <string>
 using namespace std;
 
-const int MAX = 500;
+extern const int MAX = 500;
 
 int nextParcelID = 1001;
 

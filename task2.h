@@ -3,7 +3,9 @@
 
 #include <string>
 #include "task1.h"
+
 using namespace std;
+
 // 1. Service Request Structure
 struct ServiceRequest {
     int requestID;
@@ -16,9 +18,9 @@ struct ServiceRequest {
     string status;
 };
 
-// 2. Priority Queue Structure (Must be declared before using in functions!)
+// 2. Priority Queue Structure
 struct RequestPriorityQueue {
-    ServiceRequest requests[MAX];
+    ServiceRequest requests[500];
     int count;
 };
 
@@ -26,10 +28,15 @@ struct RequestPriorityQueue {
 extern RequestPriorityQueue activeRequests;
 extern int nextRequestID;
 
-// 4. Helper & Requirement Prototypes
+// 4. Function Prototypes
 bool isRequestQueueFull(const RequestPriorityQueue& q);
 bool isRequestQueueEmpty(const RequestPriorityQueue& q);
+ServiceRequest* findServiceRequest(int requestID);
 
 void createServiceRequest(int parcelID, string serviceType, int priorityLevel, string requestDateTime);
+void displayActiveRequests();
+ServiceRequest* getNextRequest();
+void processServiceRequest(int requestID, string newStatus);
+void cancelServiceRequest(int requestID);
 
-#endif
+#endif // TASK2_H
