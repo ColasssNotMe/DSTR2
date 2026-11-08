@@ -1,6 +1,7 @@
 #include "task1.h"
 // #include "task2.h"
 #include "task3.h"
+#include "task4.h"
 #include <exception>
 #include <iomanip>
 #include <iostream>
@@ -371,6 +372,7 @@ void menu() {
     cout << "6. Delete Parcel Record" << endl;
     cout << "7. [Task 2] Create Service Request" << endl;
     cout << "8. [Task 3] Resource Management Module" << endl;
+    cout << "9. [Task 4] Parcel Activity & Record Management" << endl;
     cout << "0. Exit" << endl;
 
     int selection;
@@ -400,7 +402,11 @@ void menu() {
       // option7Menu();
       break;
     case 8:
-        option8Menu();
+      option8Menu();
+      break;
+    case 9:
+      task4Menu();
+      break;
     case 0:
       return;
     default:

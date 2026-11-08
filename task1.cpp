@@ -1,5 +1,6 @@
 // FIXME: search using name
 #include "iostream"
+#include "task4.h"
 #include <algorithm>
 #include <exception>
 #include <iomanip>
@@ -164,6 +165,11 @@ void registerNewParcel(string recipientName, string recipientID,
   enqueue(parcelToBeAdd, normalParcels);
   cout << "Parcel added with Parcel ID: " << parcelToBeAdd.parcelID << endl;
   // FIXME: impossible for id duplicate
+
+  // Task 4: Record parcel registration (initial record is non-reversible)
+  recordActivity(parcelToBeAdd.parcelID, "REGISTER", "-", parcelToBeAdd.status, "", "", false);
+
+
 }
 
 void serveParcel(Queue queue) { dequeue(queue); }
@@ -317,6 +323,7 @@ void processParcel() {
   }
 
   Parcel currentParcel = normalParcels.parcels[normalParcels.front];
+  string prevStatus = currentParcel.status;
 
   cout << "Current parcel waiting to be process: " << currentParcel.parcelID
        << endl;
@@ -338,6 +345,7 @@ void processParcel() {
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
     dequeue(normalParcels);
+    recordActivity(currentParcel.parcelID, "PROCESS", prevStatus, currentParcel.status, "", "", true);
     break;
 
   case 2:
@@ -346,6 +354,7 @@ void processParcel() {
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
     dequeue(normalParcels);
+    recordActivity(currentParcel.parcelID, "PROCESS", prevStatus, currentParcel.status, "", "", true);
     break;
 
   case 3:
@@ -354,6 +363,7 @@ void processParcel() {
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
     dequeue(normalParcels);
+    recordActivity(currentParcel.parcelID, "PROCESS", prevStatus, currentParcel.status, "", "", true);
     break;
 
   case 4:
@@ -362,6 +372,7 @@ void processParcel() {
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
     dequeue(normalParcels);
+    recordActivity(currentParcel.parcelID, "PROCESS", prevStatus, currentParcel.status, "", "", true);
     break;
 
   case 5:
@@ -370,6 +381,7 @@ void processParcel() {
     cout << "Successfully added " << currentParcel.parcelID << " to "
          << currentParcel.status << endl;
     dequeue(normalParcels);
+    recordActivity(currentParcel.parcelID, "PROCESS", prevStatus, currentParcel.status, "", "", true);
     break;
 
   default:
@@ -429,6 +441,8 @@ void updateParcel(string parcelID) {
     current = (current + 1) % MAX;
   }
 
+  string prevStatus = updatedParcel.status;
+
   cout << endl << endl;
   cout << "Select parcel status to update: " << endl;
   cout << "1. Collection" << endl;
@@ -475,6 +489,7 @@ void updateParcel(string parcelID) {
   case 6:
     if (removeParcel(*originalQueue, id)) {
       cout << "Parcel " << id << " successfully cancelled." << endl;
+      recordActivity(id, "CANCEL", prevStatus, "Cancelled", "", "", false);
     }
     return;
 
@@ -495,6 +510,7 @@ void updateParcel(string parcelID) {
     enqueue(updatedParcel, *destinationQueue);
     cout << "Successfully updated parcel " << id << " to "
          << updatedParcel.status << endl;
+         recordActivity(id, "UPDATE_STATUS", prevStatus, updatedParcel.status, "", "", true);
   }
 }
 
