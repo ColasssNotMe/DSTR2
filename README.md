@@ -1,4 +1,4 @@
-g++ main.cpp task1.cpp -o main
+g++ main.cpp task1.cpp task3.cpp -o main
 
 > ## Parcel
 

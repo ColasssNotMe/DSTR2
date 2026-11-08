@@ -1,5 +1,6 @@
 #include "task1.h"
 // #include "task2.h"
+#include "task3.h"
 #include <exception>
 #include <iomanip>
 #include <iostream>
@@ -181,12 +182,181 @@ void option6Menu() {
 //   requestDateTime);
 // }
 
+
+// ================= TASK 3 =================
+
+// Q1: Register Resource
+void optionResource1() {
+    int choice;
+
+    cout << "\n========== Register Resource ==========\n";
+    cout << "1. Counter\n";
+    cout << "2. Delivery\n";
+    cout << "0. Back\n";
+
+    cout << "Enter selection: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        registerNewResource("Counter");
+    }
+    else if (choice == 2) {
+        registerNewResource("Delivery");
+    }
+    else if (choice == 0) {
+        return;
+    }
+    else {
+        cout << "Invalid selection.\n";
+    }
+}
+
+
+// Q2: Display Resources
+void optionResource2() {
+    cout << "\n========== Resource Availability ==========\n";
+
+    displayAllResources();
+}
+
+
+// Q3: Assign Parcel to Resource
+void optionResource3() {
+    int parcelID;
+    int requestID;
+    int choice;
+
+    string type;
+
+    cout << "\n========== Assign Parcel ==========\n";
+
+    cout << "Enter Parcel ID: ";
+    cin >> parcelID;
+
+    cout << "Enter Request ID: ";
+    cin >> requestID;
+
+    cout << "\nSelect Resource Type:\n";
+    cout << "1. Counter\n";
+    cout << "2. Delivery\n";
+
+    cout << "Enter selection: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        type = "Counter";
+    }
+    else if (choice == 2) {
+        type = "Delivery";
+    }
+    else {
+        cout << "Invalid selection.\n";
+        return;
+    }
+
+    assignParcelToResource(parcelID, requestID, type);
+}
+
+
+// Q4: Release Resource
+void optionResource4() {
+    string resourceID;
+
+    cout << "\nEnter Resource ID to release: ";
+    cin >> resourceID;
+
+    int parcelID = releaseParcelResource(resourceID);
+
+    if (parcelID != 0) {
+        cout << "Parcel " << parcelID << " released.\n";
+    }
+}
+
+
+// Set Resource Unavailable
+void optionResource5() {
+    string resourceID;
+
+    cout << "\nEnter Resource ID: ";
+    cin >> resourceID;
+
+    setResourceUnavailable(resourceID);
+}
+
+
+// Set Resource Available
+void optionResource6() {
+    string resourceID;
+
+    cout << "\nEnter Resource ID: ";
+    cin >> resourceID;
+
+    setResourceAvailable(resourceID);
+}
+
+
+// Resource Management Menu
+void option8Menu() {
+    int selection;
+
+    while (true) {
+        cout << "\n" << string(40, '=') << endl;
+        cout << "Resource Management" << endl;
+        cout << string(40, '=') << endl;
+
+        cout << "1. Register New Resource" << endl;
+        cout << "2. Display All Resources" << endl;
+        cout << "3. Assign Parcel to Resource" << endl;
+        cout << "4. Release Resource" << endl;
+        cout << "5. Set Resource Unavailable" << endl;
+        cout << "6. Set Resource Available" << endl;
+        cout << "0. Back to Main Menu" << endl;
+
+        cout << "Enter selection: ";
+        cin >> selection;
+
+        switch (selection) {
+        case 1:
+            optionResource1();
+            break;
+
+        case 2:
+            optionResource2();
+            break;
+
+        case 3:
+            optionResource3();
+            break;
+
+        case 4:
+            optionResource4();
+            break;
+
+        case 5:
+            optionResource5();
+            break;
+
+        case 6:
+            optionResource6();
+            break;
+
+        case 0:
+            return;
+
+        default:
+            cout << "Invalid selection. Please try again.\n";
+            break;
+        }
+    }
+}
+
 void seedInitialData() {
   registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00",
                     "");
   registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document",
                     "2026-11-05 08:30", "");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
+  seedResources();
 }
 
 void menu() {
@@ -207,6 +377,7 @@ void menu() {
     cout << "5. Update Parcel Record" << endl;
     cout << "6. Delete Parcel Record" << endl;
     cout << "7. [Task 2] Create Service Request" << endl;
+    cout << "8. [Task 3] Resource Management Module" << endl;
     cout << "0. Exit" << endl;
 
     int selection;
@@ -235,6 +406,8 @@ void menu() {
     case 7:
       // option7Menu();
       break;
+    case 8:
+        option8Menu();
     case 0:
       return;
     default:
