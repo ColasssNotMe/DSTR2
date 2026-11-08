@@ -219,42 +219,35 @@ void optionResource2() {
     displayAllResources();
 }
 
-
-// Q3: Assign Parcel to Resource
 void optionResource3() {
-    int parcelID;
-    int requestID;
+
     int choice;
 
-    string type;
-
-    cout << "\n========== Assign Parcel ==========\n";
-
-    cout << "Enter Parcel ID: ";
-    cin >> parcelID;
-
-    cout << "Enter Request ID: ";
-    cin >> requestID;
-
-    cout << "\nSelect Resource Type:\n";
-    cout << "1. Counter\n";
-    cout << "2. Delivery\n";
+    cout << "\n========== ASSIGN RESOURCE ==========\n";
+    cout << "1. Assign Parcel" << endl;
+    cout << "2. Assign Receipt" << endl;
+    cout << "0. Back" << endl;
 
     cout << "Enter selection: ";
     cin >> choice;
 
-    if (choice == 1) {
-        type = "Counter";
-    }
-    else if (choice == 2) {
-        type = "Delivery";
-    }
-    else {
-        cout << "Invalid selection.\n";
-        return;
-    }
+    switch (choice) {
 
-    assignParcelToResource(parcelID, requestID, type);
+    case 1:
+        assignParcelMenu();
+        break;
+
+    case 2:
+        assignReceiptMenu();
+        break;
+
+    case 0:
+        return;
+
+    default:
+        cout << "Invalid selection." << endl;
+        break;
+    }
 }
 
 

@@ -1,4 +1,3 @@
-
 #ifndef TASK3_H
 #define TASK3_H
 
@@ -9,6 +8,7 @@ extern const int MAX_RESOURCE;
 extern int nextCounterNumber;
 extern int nextDeliveryNumber;
 
+// Resource information
 class Resource {
 public:
     std::string resourceID;
@@ -16,9 +16,10 @@ public:
     std::string status;
 
     int parcelID = 0;
-    int requestID = 0;
+    int receiptID = 0;
 };
 
+// Resource Queue
 struct ResourceQueue {
     Resource* resources[10];
 
@@ -27,6 +28,7 @@ struct ResourceQueue {
     int count = 0;
 };
 
+// Global resource queues
 extern ResourceQueue* counterQueue;
 extern ResourceQueue* deliveryQueue;
 extern ResourceQueue* allResourceQueue[2];
@@ -38,21 +40,27 @@ bool isResourceQueueEmpty(ResourceQueue*& queue);
 bool enqueueResource(Resource* resource, ResourceQueue*& queue);
 bool dequeueResource(ResourceQueue*& queue, Resource*& resource);
 
+// Find resource
 Resource* findResource(std::string resourceID);
 Resource* getResourceOfParcel(int parcelID);
 
+// Q1: Register Resource
 bool registerNewResource(std::string type);
 void seedResources();
 
+// Q2: Display Resource
 void printResource(Resource* resource);
 void displayAllResources();
 
-std::string assignParcelToResource(
-    int parcelID,
-    int requestID,
-    std::string type
-);
+// Q3: Assign Parcel / Receipt
+std::string assignParcelToResource(int parcelID, std::string resourceID);
+std::string assignReceiptToResource(int receiptID, std::string resourceID);
 
+void assignParcelMenu();
+void assignReceiptMenu();
+void optionResource3();
+
+// Q4: Release and Update Resource
 int releaseParcelResource(std::string resourceID);
 
 bool setResourceUnavailable(std::string resourceID);
