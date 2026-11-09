@@ -9,6 +9,35 @@
 
 using namespace std;
 
+void optionAddParcelMenu() {
+  string recipientName;
+  string recipientID;
+  string deliveryCompany;
+  string parcelType;
+  string arrivalDateTime;
+
+  cout << endl << endl;
+  cin.ignore();
+
+  cout << "Enter recipient name: ";
+  getline(cin, recipientName);
+
+  cout << "Enter recipient ID: ";
+  getline(cin, recipientID);
+
+  cout << "Enter delivery company: ";
+  getline(cin, deliveryCompany);
+
+  cout << "Enter parcel type: ";
+  getline(cin, parcelType);
+
+  cout << "Enter arrival date/time (e.g. 2026-11-09 10:00): ";
+  getline(cin, arrivalDateTime);
+
+  registerNewParcel(recipientName, recipientID, deliveryCompany, parcelType,
+                    arrivalDateTime);
+}
+
 void option1Menu() {
   cout << string(50, '=') << endl;
   cout << "Unprocessed Parcel" << endl;
@@ -396,16 +425,17 @@ void menu() {
     cout << setw(12) << " " << "Main Menu" << endl;
     cout << string(35, '=') << endl;
 
-    cout << "1. Display All Parcels" << endl;
-    cout << "2. Search Parcel" << endl;
-    cout << "3. View Parcel Detail" << endl;
-    cout << "4. Sort & Process Incoming Parcel" << endl;
-    cout << "5. Update Parcel Record" << endl;
-    cout << "6. Delete Parcel Record" << endl;
-    cout << "7. [Task 2] Service Request Management" << endl;
-    cout << "8. [Task 3] Resource Management Module" << endl;
-    cout << "9. [Task 4] Parcel Activity & Record Management" << endl;
-    cout << "10. Save Parcels to File" << endl;
+    cout << "1. Add A Parcel" << endl;
+    cout << "2. Display All Parcels" << endl;
+    cout << "3. Search Parcel" << endl;
+    cout << "4. View Parcel Detail" << endl;
+    cout << "5. Sort & Process Incoming Parcel" << endl;
+    cout << "6. Update Parcel Record" << endl;
+    cout << "7. Delete Parcel Record" << endl;
+    cout << "8. [Task 2] Service Request Management" << endl;
+    cout << "9. [Task 3] Resource Management Module" << endl;
+    cout << "10. [Task 4] Parcel Activity & Record Management" << endl;
+    cout << "11. Save Parcels to File" << endl;
     cout << "0. Exit" << endl;
 
     int selection;
@@ -414,33 +444,36 @@ void menu() {
 
     switch (selection) {
     case 1:
-      option1Menu();
+      optionAddParcelMenu();
       break;
     case 2:
-      option2Menu();
+      option1Menu();
       break;
     case 3:
-      option3Menu();
+      option2Menu();
       break;
     case 4:
-      processParcel();
+      option3Menu();
       break;
     case 5:
-      option5Menu();
+      processParcel();
       break;
     case 6:
-      option6Menu();
+      option5Menu();
       break;
     case 7:
-      option7Menu();
+      option6Menu();
       break;
     case 8:
-      option8Menu();
+      option7Menu();
       break;
     case 9:
-      task4Menu();
+      option8Menu();
       break;
     case 10:
+      task4Menu();
+      break;
+    case 11:
       saveParcelsToFile();
       break;
     case 0:
