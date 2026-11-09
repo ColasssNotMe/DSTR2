@@ -159,6 +159,25 @@ bool isParcelCollected(int parcelID) {
   return false;
 }
 
+bool hasRecipientIDWithDifferentName(string recipientID, string recipientName) {
+  for (int i = 0; i < 7; i++) {
+    Queue *currentQueue = allQueue[i];
+    if (isEmpty(*currentQueue)) {
+      continue;
+    }
+    int current = currentQueue->front;
+    for (int j = 0; j < currentQueue->count; j++) {
+      Parcel currentParcel = currentQueue->parcels[current];
+      if (currentParcel.recipientID == recipientID &&
+          currentParcel.recipientName != recipientName) {
+        return true;
+      }
+      current = (current + 1) % MAX;
+    }
+  }
+  return false;
+}
+
 // question 1
 void registerNewParcel(string recipientName, string recipientID,
                        string deliveryCompany, string parcelType,
@@ -191,6 +210,12 @@ void registerNewParcel(string recipientName, string recipientID,
   }
   if (status == "") {
     cout << "Invalid Parcel Status" << endl;
+    return;
+  }
+
+  if (hasRecipientIDWithDifferentName(recipientID, recipientName)) {
+    cout << "Recipient ID " << recipientID
+         << " already exists with a different recipient name." << endl;
     return;
   }
 
