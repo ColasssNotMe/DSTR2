@@ -358,6 +358,14 @@ void optionResource6() {
 
     setResourceAvailable(resourceID);
 }
+void optionResource7() {
+    string resourceID;
+
+    cout << "\nEnter Resource ID: ";
+    cin >> resourceID;
+
+    setResourceOccupied(resourceID);
+}
 
 void option8Menu() {
     int selection;
@@ -373,6 +381,7 @@ void option8Menu() {
         cout << "4. Release Resource" << endl;
         cout << "5. Set Resource Unavailable" << endl;
         cout << "6. Set Resource Available" << endl;
+        cout << "7. Set Resource Occupied" << endl;
         cout << "0. Back to Main Menu" << endl;
 
         cout << "Enter selection: ";
@@ -397,6 +406,9 @@ void option8Menu() {
         case 6:
             optionResource6();
             break;
+        case 7:
+            optionResource7();
+            break;
         case 0:
             return;
         default:
@@ -417,7 +429,6 @@ void menu() {
     seedInitialData();
   }
 
-  seedResources();
 
   while (true) {
     cout << endl << endl;

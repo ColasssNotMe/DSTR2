@@ -44,15 +44,15 @@ bool dequeueResource(ResourceQueue*& queue, Resource*& resource);
 Resource* findResource(std::string resourceID);
 Resource* getResourceOfParcel(int parcelID);
 
-// Q1: Register Resource
+// Q1
 bool registerNewResource(std::string type);
 void seedResources();
 
-// Q2: Display Resource
+// Q2
 void printResource(Resource* resource);
 void displayAllResources();
 
-// Q3: Assign Parcel / Receipt
+// Q3
 std::string assignParcelToResource(int parcelID, std::string resourceID);
 std::string assignReceiptToResource(int receiptID, std::string resourceID);
 
@@ -60,9 +60,9 @@ void assignParcelMenu();
 void assignReceiptMenu();
 void optionResource3();
 
-// Q4: Release and Update Resource
+// Q4
 int releaseParcelResource(std::string resourceID);
-
+bool setResourceOccupied(std::string resourceID);
 bool setResourceUnavailable(std::string resourceID);
 bool setResourceAvailable(std::string resourceID);
 

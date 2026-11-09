@@ -22,7 +22,7 @@ ResourceQueue* allResourceQueue[2] = {
 };
 
 
-// Check full or empty
+// check 
 bool isResourceQueueFull(ResourceQueue*& queue) {
     return queue->count == MAX_RESOURCE;
 }
@@ -32,7 +32,7 @@ bool isResourceQueueEmpty(ResourceQueue*& queue) {
 }
 
 
-// Add and remove resource
+// add and remove resourvce
 bool enqueueResource(Resource* resource, ResourceQueue*& queue) {
 
     if (isResourceQueueFull(queue)) {
@@ -72,7 +72,7 @@ bool dequeueResource(ResourceQueue*& queue, Resource*& resource) {
 }
 
 
-// Find resource using Resource ID
+// find use rid
 Resource* findResource(string resourceID) {
 
     for (int i = 0; i < 2; i++) {
@@ -96,7 +96,7 @@ Resource* findResource(string resourceID) {
 }
 
 
-// Find resource using Parcel ID
+// find use pid
 Resource* getResourceOfParcel(int parcelID) {
 
     for (int i = 0; i < 2; i++) {
@@ -120,7 +120,7 @@ Resource* getResourceOfParcel(int parcelID) {
 }
 
 
-// Q1: Register Resource
+// q1
 bool registerNewResource(string type) {
 
     ResourceQueue* queue = nullptr;
@@ -195,7 +195,7 @@ bool registerNewResource(string type) {
 }
 
 
-// Q2: Display Resource
+// q2
 void printResource(Resource* resource) {
 
     if (resource == nullptr) {
@@ -259,7 +259,7 @@ void displayAllResources() {
 }
 
 
-// Q3: Assign Parcel to exact Resource ID
+// q3
 string assignParcelToResource(int parcelID, string resourceID) {
 
     Resource* resource = findResource(resourceID);
@@ -343,7 +343,7 @@ void assignReceiptMenu() {
 
 
 
-// Q4: Release Resource
+// q4
 int releaseParcelResource(string resourceID) {
 
     Resource* resource = findResource(resourceID);
@@ -369,6 +369,32 @@ int releaseParcelResource(string resourceID) {
     return parcelID;
 }
 
+// Set Resource Occupied
+bool setResourceOccupied(string resourceID) {
+
+    Resource* resource = findResource(resourceID);
+
+    if (resource == nullptr) {
+        cout << "Resource not found." << endl;
+        return false;
+    }
+
+    if (resource->status == "Occupied") {
+        cout << "Resource is already occupied." << endl;
+        return false;
+    }
+
+    if (resource->status == "Unavailable") {
+        cout << "Cannot set an unavailable resource as occupied." << endl;
+        return false;
+    }
+
+    resource->status = "Occupied";
+
+    cout << "Resource set to occupied." << endl;
+
+    return true;
+}
 
 // Set Resource Unavailable
 bool setResourceUnavailable(string resourceID) {
@@ -426,17 +452,17 @@ bool setResourceAvailable(string resourceID) {
 }
 
 
-// Add initial resources
-void seedResources() {
+// // Add initial resources
+// void seedResources() {
 
-    if (counterQueue->count == 0 &&
-        deliveryQueue->count == 0) {
+//     if (counterQueue->count == 0 &&
+//         deliveryQueue->count == 0) {
 
-        registerNewResource("Counter");
-        registerNewResource("Counter");
-        registerNewResource("Delivery");
-        registerNewResource("Delivery");
+//         registerNewResource("Counter");
+//         registerNewResource("Counter");
+//         registerNewResource("Delivery");
+//         registerNewResource("Delivery");
 
-        cout << "\nInitial resources loaded.\n";
-    }
-}
+//         cout << "\nInitial resources loaded.\n";
+//     }
+// }
