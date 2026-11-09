@@ -1,7 +1,9 @@
 #include "iostream"
 #include "task4.h"
 #include <exception>
+#include <fstream>
 #include <iomanip>
+#include <sstream>
 #include <string>
 using namespace std;
 
@@ -56,6 +58,26 @@ void enqueue(Parcel parcel, Queue &queue) {
   queue.parcels[queue.rear] = parcel;
   queue.count++;
   cout << "Added parcel into queue" << endl;
+}
+
+static void appendParcelToQueue(Parcel parcel, Queue &queue) {
+  if (isFull(queue)) {
+    return;
+  }
+  if (isEmpty(queue)) {
+    queue.front = 0;
+  }
+  queue.rear = (queue.rear + 1) % MAX;
+  queue.parcels[queue.rear] = parcel;
+  queue.count++;
+}
+
+void clearAllQueues() {
+  for (int i = 0; i < 6; i++) {
+    allQueue[i]->front = -1;
+    allQueue[i]->rear = -1;
+    allQueue[i]->count = 0;
+  }
 }
 
 void dequeue(Queue &queue) {
@@ -519,3 +541,127 @@ void updateParcel(string parcelID) {
 
 // Question 5
 //  Integrate within the whole task1 so no need implementation
+
+bool saveParcelsToFile(const string &filename) {
+  ofstream outFile(filename);
+
+  if (!outFile.is_open()) {
+    cout << "Unable to open '" << filename << "' for writing." << endl;
+    return false;
+  }
+
+  outFile << nextParcelID << endl;
+
+  int totalParcels = 0;
+
+  for (int queueIndex = 0; queueIndex < 6; queueIndex++) {
+    Queue *queue = allQueue[queueIndex];
+    int current = queue->front;
+
+    for (int i = 0; i < queue->count; i++) {
+      Parcel parcel = queue->parcels[current];
+
+      outFile << queueIndex << '|' << parcel.parcelID << '|'
+              << parcel.recipientName << '|' << parcel.recipientID << '|'
+              << parcel.deliveryCompany << '|' << parcel.parcelType << '|'
+              << parcel.arrivalDateTime << '|' << parcel.status << endl;
+
+      current = (current + 1) % MAX;
+      totalParcels++;
+    }
+  }
+
+  outFile.close();
+
+  if (outFile.fail()) {
+    cout << "Error occurred while saving parcels to '" << filename << "'."
+         << endl;
+    return false;
+  }
+
+  cout << "Saved " << totalParcels << " parcel(s) to '" << filename << "'."
+       << endl;
+  return true;
+}
+
+bool loadParcelsFromFile(const string &filename) {
+  ifstream inFile(filename);
+
+  if (!inFile.is_open()) {
+    return false;
+  }
+
+  string line;
+
+  if (!getline(inFile, line)) {
+    inFile.close();
+    return false;
+  }
+
+  int savedNextParcelID;
+  try {
+    savedNextParcelID = stoi(line);
+  } catch (const exception &e) {
+    savedNextParcelID = 1001;
+  }
+
+  clearAllQueues();
+
+  int loadedCount = 0;
+  int highestParcelID = 0;
+
+  while (getline(inFile, line)) {
+    stringstream recordStream(line);
+    string queueField;
+    string parcelIDField;
+
+    if (!getline(recordStream, queueField, '|') ||
+        !getline(recordStream, parcelIDField, '|')) {
+      continue;
+    }
+
+    int queueIndex;
+    int parcelID;
+    try {
+      queueIndex = stoi(queueField);
+      parcelID = stoi(parcelIDField);
+    } catch (const exception &e) {
+      continue;
+    }
+
+    if (queueIndex < 0 || queueIndex >= 6) {
+      continue;
+    }
+
+    Parcel parcel;
+    parcel.parcelID = parcelID;
+    if (!getline(recordStream, parcel.recipientName, '|') ||
+        !getline(recordStream, parcel.recipientID, '|') ||
+        !getline(recordStream, parcel.deliveryCompany, '|') ||
+        !getline(recordStream, parcel.parcelType, '|') ||
+        !getline(recordStream, parcel.arrivalDateTime, '|') ||
+        !getline(recordStream, parcel.status)) {
+      continue;
+    }
+
+    if (!parcel.status.empty() && parcel.status.back() == '\r') {
+      parcel.status.pop_back();
+    }
+
+    appendParcelToQueue(parcel, *allQueue[queueIndex]);
+
+    loadedCount++;
+    if (parcelID > highestParcelID) {
+      highestParcelID = parcelID;
+    }
+  }
+
+  inFile.close();
+
+  nextParcelID = savedNextParcelID > highestParcelID ? savedNextParcelID
+                                                     : highestParcelID + 1;
+
+  cout << "Loaded " << loadedCount << " parcel(s) from '" << filename << "'."
+       << endl;
+  return true;
+}

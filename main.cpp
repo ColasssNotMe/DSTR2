@@ -381,11 +381,14 @@ void seedInitialData() {
   registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00", "");
   registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document", "2026-11-05 08:30", "");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
-  seedResources();
 }
 
 void menu() {
-  seedInitialData();
+  if (!loadParcelsFromFile()) {
+    seedInitialData();
+  }
+
+  seedResources();
 
   while (true) {
     cout << endl << endl;
@@ -402,6 +405,7 @@ void menu() {
     cout << "7. [Task 2] Service Request Management" << endl;
     cout << "8. [Task 3] Resource Management Module" << endl;
     cout << "9. [Task 4] Parcel Activity & Record Management" << endl;
+    cout << "10. Save Parcels to File" << endl;
     cout << "0. Exit" << endl;
 
     int selection;
@@ -435,6 +439,9 @@ void menu() {
       break;
     case 9:
       task4Menu();
+      break;
+    case 10:
+      saveParcelsToFile();
       break;
     case 0:
       return;

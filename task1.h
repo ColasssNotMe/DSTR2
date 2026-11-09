@@ -72,4 +72,8 @@ void processParcel();
 Parcel *searchSpecificParcel(std::string parcelID);
 void updateParcel(std::string parcelID);
 
+void clearAllQueues();
+bool saveParcelsToFile(const std::string &filename = "parcels.txt");
+bool loadParcelsFromFile(const std::string &filename = "parcels.txt");
+
 #endif // PARCEL_H
