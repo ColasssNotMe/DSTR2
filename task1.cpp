@@ -37,6 +37,7 @@ Queue toBeCollectParcel;
 Queue returnedParcel;
 Queue onHoldInvestigaton;
 Queue collectedParcel;
+Queue collectedParcel;
 
 Queue *allQueue[] = {&normalParcels,      &toBeCollectParcel,
                      &toBeDelivered,      &toBeSpecialHandling,
@@ -75,6 +76,7 @@ static void appendParcelToQueue(Parcel parcel, Queue &queue) {
 }
 
 void clearAllQueues() {
+  for (int i = 0; i < 7; i++) {
   for (int i = 0; i < 7; i++) {
     allQueue[i]->front = -1;
     allQueue[i]->rear = -1;
@@ -139,6 +141,24 @@ Queue *findParcelQueue(int parcelID) {
     }
   }
   return nullptr;
+}
+
+bool isParcelCollected(int parcelID) {
+  Queue *currentQueue = findParcelQueue(parcelID);
+  if (currentQueue == nullptr) {
+    return false;
+  }
+  if (currentQueue == &collectedParcel) {
+    return true;
+  }
+  int current = currentQueue->front;
+  for (int i = 0; i < currentQueue->count; i++) {
+    if (currentQueue->parcels[current].parcelID == parcelID) {
+      return currentQueue->parcels[current].status == "Collected";
+    }
+    current = (current + 1) % MAX;
+  }
+  return false;
 }
 
 bool isParcelCollected(int parcelID) {
@@ -319,6 +339,7 @@ void searchAllMatchingParcel(string searchTerm, int field) {
 void viewParcelDetail(int parcelID) {
   Parcel *selectedParcel = nullptr;
   for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 7; i++) {
     Queue *currentQueue = allQueue[i];
     if (isEmpty(*currentQueue)) {
       continue;
@@ -450,6 +471,7 @@ Parcel *searchSpecificParcel(string parcelID) {
     return nullptr;
   }
   for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 7; i++) {
     Queue *currentQueue = allQueue[i];
     if (isEmpty(*currentQueue)) {
       continue;
@@ -508,6 +530,7 @@ void updateParcel(string parcelID) {
   cout << "5. Return" << endl;
   cout << "6. Cancellation" << endl;
   cout << "7. Collected" << endl;
+  cout << "7. Collected" << endl;
   cout << "0. Return to main menu" << endl;
 
   cout << "Enter selection: ";
@@ -555,6 +578,11 @@ void updateParcel(string parcelID) {
     destinationQueue = &collectedParcel;
     break;
 
+  case 7:
+    updatedParcel.status = "Collected";
+    destinationQueue = &collectedParcel;
+    break;
+
   case 0:
     return;
 
@@ -574,6 +602,7 @@ void updateParcel(string parcelID) {
          << updatedParcel.status << endl;
     recordActivity(id, "UPDATE_STATUS", prevStatus, updatedParcel.status, "",
                    "", updatedParcel.status != "Collected");
+                   "", updatedParcel.status != "Collected");
   }
 }
 
@@ -592,6 +621,7 @@ bool saveParcelsToFile(const string &filename) {
 
   int totalParcels = 0;
 
+  for (int queueIndex = 0; queueIndex < 7; queueIndex++) {
   for (int queueIndex = 0; queueIndex < 7; queueIndex++) {
     Queue *queue = allQueue[queueIndex];
     int current = queue->front;
@@ -667,6 +697,7 @@ bool loadParcelsFromFile(const string &filename) {
       continue;
     }
 
+    if (queueIndex < 0 || queueIndex >= 7) {
     if (queueIndex < 0 || queueIndex >= 7) {
       continue;
     }

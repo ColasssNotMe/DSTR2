@@ -5,19 +5,22 @@
 
 // Activity structure for Task 4
 // Uses two custom pointer links
-// - nextActivity: Singly Linked List (points forward in time to newer activity)
-// - stackNext: LIFO Stack (points downward on the undo stack to older activity)
 struct Activity {
     int activityID;
     int parcelID;
-    std::string activityType;      // e.g. REGISTER, PROCESS, UPDATE_STATUS, SERVICE_REQUEST, UNDO
+    std::string activityType;      // REGISTER, PROCESS, UPDATE_STATUS, SERVICE_REQUEST, UNDO
     std::string previousStatus;    // Status before the activity occurred
     std::string newStatus;         // Status after the activity occurred
-    std::string requestID;         // Task 2 service request ID ("" if none)
-    std::string resourceID;        // Task 3 resource/counter ID ("" if none)
-    std::string timestamp;         // Formatted YYYY-MM-DD HH:MM:SS
-    bool reversible;               // Whether this activity is eligible for undo
-    bool reversed;                 // Whether this activity has already been reversed
+
+    std::string requestID;         // for task 2 service request
+    std::string previousRequestStatus;
+    std::string newRequestStatus;
+
+    std::string resourceID;        // for task 3 resource
+
+    std::string timestamp;         // YYYY-MM-DD HH:MM:SS
+    bool reversible;               // flag activity is eligible for undo
+    bool reversed;                 // flag activity has already been reversed
     Activity* nextActivity;        // Pointer to newer activity for log
     Activity* stackNext;           // Pointer to older activity below on LIFO undo stack
 };
@@ -25,13 +28,17 @@ struct Activity {
 // Core Task 4 operations
 void recordActivity(int parcelID, const std::string& type, const std::string& prevStatus,
                     const std::string& newStatus, const std::string& requestID = "",
-                    const std::string& resourceID = "", bool reversible = true);
+                    const std::string& resourceID = "", bool reversible = true,
+                    const std::string& previousRequestStatus = "",const std::string& newRequestStatus = "");
 
 void task4Menu();
+std::string GetParcelStatus(int parcelID);
 void displayRecentActivities(int n);
 void displayParcelHistory(int parcelID);
 void reviewParcelActivities(int parcelID);
 bool undoLastActivity();
 bool undoActivityByID(int activityID);
+bool saveActivitiesToFile(const std::string& filename = "activities.txt");
+bool loadActivitiesFromFile(const std::string& filename = "activities.txt");
 
 #endif // TASK4_H

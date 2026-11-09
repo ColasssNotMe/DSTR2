@@ -4,8 +4,43 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <fstream>
 
 using namespace std;
+
+void saveRequestsToFile(const string& filename) {
+    ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        cout << "[ERROR] Could not open file '" << filename << "' for writing.\n";
+        return;
+    }
+
+
+    outFile << left << setw(10) << "Req ID"
+            << setw(12) << "Parcel ID"
+            << setw(20) << "Recipient Name"
+            << setw(22) << "Service Type"
+            << setw(12) << "Priority"
+            << setw(20) << "Date/Time"
+            << setw(14) << "Status" << "\n";
+    outFile << string(110, '-') << "\n";
+
+
+    for (int i = 0; i < activeRequests.count; i++) {
+        ServiceRequest req = activeRequests.requests[i];
+        outFile << left << setw(10) << req.requestID
+                << setw(12) << req.parcelID
+                << setw(20) << req.recipientName
+                << setw(22) << req.serviceType
+                << setw(12) << req.priorityLevel
+                << setw(20) << req.requestDateTime
+                << setw(14) << req.status << "\n";
+    }
+
+    outFile.close();
+    cout << "[SUCCESS] Saved " << activeRequests.count << " request(s) to '" << filename << "'.\n";
+}
+
 
 void saveRequestsToFile(const string& filename) {
     ofstream outFile(filename);
@@ -110,8 +145,8 @@ void createServiceRequest(int parcelID, string serviceType, int priorityLevel, s
     string prevStatus = targetParcel->status;
     targetParcel->status = "Requested: " + serviceType;
 
-   
-    recordActivity(targetParcel->parcelID, "SERVICE_REQUEST", prevStatus, targetParcel->status, to_string(req.requestID), "", true);
+
+    recordActivity(targetParcel->parcelID, "SERVICE_REQUEST", prevStatus, targetParcel->status, to_string(req.requestID), "", true, "", "Pending");
 
     cout << "[SUCCESS] Service Request ID " << req.requestID 
          << " created for Parcel ID " << parcelID 
@@ -180,13 +215,21 @@ void processServiceRequest(int requestID, string newStatus) {
         return;
     }
 
+
+    string previousRequestStatus = req->status;
+
     req->status = newStatus;
 
     Parcel* targetParcel = searchSpecificParcel(to_string(req->parcelID));
     if (targetParcel != nullptr) {
         string prevStatus = targetParcel->status;
         targetParcel->status = "Request " + newStatus;
-        recordActivity(req->parcelID, "PROCESS_REQUEST", prevStatus, targetParcel->status, to_string(req->requestID), "", true);
+        
+        bool canUndo = (newStatus != "Completed" && newStatus != "Cancelled");
+
+        recordActivity(req->parcelID, "PROCESS_REQUEST", prevStatus,
+            targetParcel->status, to_string(req->requestID), "", canUndo,
+            previousRequestStatus, newStatus);
     }
 
     if (newStatus == "Completed" || newStatus == "Cancelled") {
@@ -219,4 +262,28 @@ void cancelServiceRequest(int requestID) {
         return;
     }
     processServiceRequest(requestID, "Cancelled");
+}
+
+// Remove a service request from the active queue during undo
+bool removeServiceRequestForUndo(int requestID) {
+    int targetIdx = -1;
+
+    for (int i = 0; i < activeRequests.count; i++) {
+        if (activeRequests.requests[i].requestID == requestID) {
+            targetIdx = i;
+            break;
+        }
+    }
+
+    if (targetIdx == -1) {
+        return false;
+    }
+
+    for (int i = targetIdx; i < activeRequests.count - 1; i++) {
+        activeRequests.requests[i] = activeRequests.requests[i + 1];
+    }
+
+    activeRequests.count--;
+
+    return true;
 }

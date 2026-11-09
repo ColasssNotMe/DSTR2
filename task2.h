@@ -38,6 +38,7 @@ void displayActiveRequests();
 ServiceRequest* getNextRequest();
 void processServiceRequest(int requestID, string newStatus);
 void cancelServiceRequest(int requestID);
+bool removeServiceRequestForUndo(int requestID);
 
 
 void saveRequestsToFile(const string& filename = "service_requests.txt");

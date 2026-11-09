@@ -1,4 +1,5 @@
 #include "task3.h"
+#include "task4.h"
 #include <iostream>
 #include <fstream>          // ===== ADDED =====
 
@@ -330,6 +331,9 @@ string assignParcelToResource(int parcelID, string resourceID) {
     resource->parcelID = parcelID;
     resource->receiptID = 0;
 
+    string parcelStatus = GetParcelStatus(parcelID);
+    recordActivity(parcelID, "ASSIGN_RESOURCE", parcelStatus, parcelStatus, "", resourceID, true);
+
     saveResources(); 
     return "Parcel assigned successfully to " + resourceID;
 }
@@ -419,7 +423,10 @@ int releaseParcelResource(string resourceID) {
     resource->receiptID = 0;
 
     cout << "Resource released successfully." << endl;
-
+    if (parcelID != 0) {
+        string parcelStatus = GetParcelStatus(parcelID);
+        recordActivity(parcelID, "RELEASE_RESOURCE", parcelStatus, parcelStatus, "", resourceID, false);
+    }
     saveResources();
     return parcelID;
 }

@@ -156,6 +156,8 @@ void option6Menu() {
     return;
   }
 
+  string prevStatus = GetParcelStatus(parcelID);  
+
   if (isParcelCollected(parcelID)) {
     cout << "Parcel " << parcelID
          << " has already been collected and cannot be deleted." << endl;
@@ -164,6 +166,7 @@ void option6Menu() {
 
   if (removeParcel(*parcelQueue, parcelID)) {
     cout << "Parcel " << parcelID << " successfully deleted." << endl;
+    recordActivity(parcelID, "DELETE", prevStatus, "Deleted", "", "", false);
   } else {
     cout << "Failed to delete parcel " << parcelID << "." << endl;
   }
@@ -452,7 +455,9 @@ void seedInitialData() {
 void menu() {
   if (!loadParcelsFromFile()) {
     seedInitialData();
-  }
+  } 
+
+  loadActivitiesFromFile();
 
   loadResources();
   if (isResourceQueueEmpty(counterQueue) && isResourceQueueEmpty(deliveryQueue)) {
@@ -515,8 +520,10 @@ void menu() {
       break;
     case 11:
       saveParcelsToFile();
+      saveActivitiesToFile();
       break;
     case 0:
+      saveActivitiesToFile();
       return;
     default:
       cout << "Invalid selection. Please try again.\n";

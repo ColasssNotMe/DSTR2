@@ -3,9 +3,13 @@
 
 #include "task4.h"
 #include "task1.h"
+#include "task2.h"
+#include "task3.h"
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 using namespace std;
 
@@ -57,7 +61,7 @@ static Queue* getQueueByStatus(const string& status) {
     if (status == "Collected") {
         return &collectedParcel;
     }
-    return &normalParcels;
+    return nullptr;
 }
 
 // set parcel status
@@ -76,6 +80,9 @@ bool SetParcelStatus(int parcelID, const string& targetStatus) {
     parcelCopy.status = targetStatus;
 
     Queue* destQueue = getQueueByStatus(targetStatus);
+    if (destQueue == nullptr) {
+        destQueue = currentQueue;
+    }
     if (destQueue != currentQueue) {
         if (removeParcel(*currentQueue, parcelID)) {
             enqueue(parcelCopy, *destQueue);
@@ -145,10 +152,30 @@ Activity* popStack() { // O(1)
     return node;
 }
 
+// check the resource still hold the parcel
+static bool resourceHeldByParcel(const string& resourceID, int parcelID) {
+    Resource* r = findResource(resourceID);
+    return r != nullptr && r->status == "Occupied" && r->parcelID == parcelID;
+}
+
+// undo back the resource 
+static bool releaseResourceForUndo(const string& resourceID, int parcelID) {
+    if (!resourceHeldByParcel(resourceID, parcelID)) {
+        return false;
+    }
+    Resource* r = findResource(resourceID);
+    r->status = "Available";
+    r->parcelID = 0;
+    r->receiptID = 0;
+    saveResources();
+    return true;
+}
+
 // function for record new activity
 void recordActivity(int parcelID, const string& type, const string& prevStatus,
     const string& newStatus, const string& requestID,
-    const string& resourceID, bool reversible) {
+    const string& resourceID, bool reversible,
+    const string& previousRequestStatus, const string& newRequestStatus) {
     Activity* node = new Activity;
     node->activityID = nextActivityID++;
     node->parcelID = parcelID;
@@ -156,6 +183,8 @@ void recordActivity(int parcelID, const string& type, const string& prevStatus,
     node->previousStatus = prevStatus;
     node->newStatus = newStatus;
     node->requestID = requestID;
+    node->previousRequestStatus = previousRequestStatus;
+    node->newRequestStatus = newRequestStatus;
     node->resourceID = resourceID;
     node->timestamp = currentTimestamp();
     node->reversible = reversible;
@@ -180,8 +209,8 @@ void recordActivity(int parcelID, const string& type, const string& prevStatus,
 
 // print the table column 
 void printActivityHeader() {
-    cout << left << setw(6) << "ID" << setw(9) << "Parcel" << setw(18) << "Activity"
-        << setw(20) << "Previous" << setw(38) << "New" << setw(22) << "Time"
+    cout << left << setw(6) << "ID" << setw(9) << "Parcel" << setw(20) << "Activity"
+        << setw(32) << "Previous" << setw(32) << "New" << setw(22) << "Time"
         << setw(10) << "Request" << setw(10) << "Resource" << "State" << endl;
     cout << string(147, '-') << endl;
 }
@@ -208,8 +237,8 @@ void printActivity(const Activity* a) {
     }
 
     cout << left << setw(6) << a->activityID << setw(9) << a->parcelID
-        << setw(18) << a->activityType << setw(20) << a->previousStatus
-        << setw(38) << a->newStatus << setw(22) << a->timestamp << setw(10)
+        << setw(20) << a->activityType << setw(32) << a->previousStatus
+        << setw(32) << a->newStatus << setw(22) << a->timestamp << setw(10)
         << reqID << setw(10)
         << resID << state << endl;
 }
@@ -318,10 +347,15 @@ void reviewParcelActivities(int parcelID) {
             if (c->reversed) {
                 reversedTag = "  [Reversed]";
             }
-            cout << "  Step " << step++ << ": [" << c->activityType << "] "
-                << c->previousStatus << " -> " << c->newStatus
-                << " (at " << c->timestamp << ")"
-                << reversedTag << endl;
+
+            // CHANGE 1: resource steps do not change the parcel status, so show the resource instead
+            cout << "  Step " << step++ << ": [" << c->activityType << "] ";
+            if (c->previousStatus == c->newStatus && !c->resourceID.empty()) {
+                cout << "Resource " << c->resourceID;
+            } else {
+                cout << c->previousStatus << " -> " << c->newStatus;
+            }
+            cout << " (at " << c->timestamp << ")" << reversedTag << endl;
         }
     }
     cout << "\nMost Recent Activity : #" << latest->activityID << " (" << latest->activityType << ")" << endl;
@@ -337,8 +371,10 @@ void reviewParcelActivities(int parcelID) {
     if (resID.empty()) {
         resID = "-";
     }
-    cout << "Request ID           : " << reqID << endl;
-    cout << "Resource ID          : " << resID << endl;
+
+    cout << "Request ID (latest)  : " << reqID << endl;
+    cout << "Resource ID (latest) : " << resID << endl;
+
     cout << string(55, '=') << endl;
 }
 
@@ -390,6 +426,40 @@ bool undoActivity(Activity* target) {
         return false;
     }
 
+    // Check: resource must still hold this parcel
+    if (target->activityType == "ASSIGN_RESOURCE" &&
+        !resourceHeldByParcel(target->resourceID, target->parcelID)) {
+        cout << "Cannot undo: resource " << target->resourceID
+             << " no longer holds parcel " << target->parcelID << "." << endl;
+        return false;
+    }
+
+    // Check whether the related service request can be found
+    ServiceRequest* request = nullptr;
+
+    if (target->activityType == "SERVICE_REQUEST" ||
+        target->activityType == "PROCESS_REQUEST") {
+
+        if (target->requestID.empty()) {
+            cout << "Service Request ID is missing.\n";
+            return false;
+        }
+
+        request = findServiceRequest(stoi(target->requestID));
+
+        if (request == nullptr) {
+            cout << "Related service request cannot be found.\n";
+            return false;
+        }
+
+        // Make sure the request is still in the expected state
+        if (target->activityType == "PROCESS_REQUEST" &&
+            request->status != target->newRequestStatus) {
+            cout << "Service request status has changed. Undo is not allowed.\n";
+            return false;
+        }
+    }
+
     // Confirmation
     cout << "\nAbout to reverse activity:" << endl;
     printActivityHeader();
@@ -405,6 +475,46 @@ bool undoActivity(Activity* target) {
         return false;
     }
 
+    // Restore related service request information
+    if (target->activityType == "SERVICE_REQUEST") {
+
+        // Remove the request that was created by this activity
+        if (!removeServiceRequestForUndo(stoi(target->requestID))) {
+            // Restore the original parcel status if removal fails
+            SetParcelStatus(target->parcelID, currentStatus);
+            cout << "Could not remove the service request.\n";
+            return false;
+        }
+
+        saveRequestsToFile();
+
+        cout << "Service request removed.\n";
+    }
+    else if (target->activityType == "PROCESS_REQUEST") {
+
+        // Restore the request to its previous status
+        request->status = target->previousRequestStatus;
+
+        saveRequestsToFile();
+
+        cout << "Service request status restored to: "
+            << request->status << "\n";
+    }
+    // Restore the related resource
+    if (target->activityType == "ASSIGN_RESOURCE") {
+
+        if (!releaseResourceForUndo(target->resourceID, target->parcelID)) {
+
+            // Restore the original parcel status if resource release fails
+            SetParcelStatus(target->parcelID, currentStatus);
+
+            cout << "Failed to release the assigned resource. Undo aborted.\n";
+            return false;
+        }
+
+        cout << "Resource " << target->resourceID << " released." << endl;
+    }
+
     popStack();
     target->reversed = true;
 
@@ -417,8 +527,22 @@ bool undoActivity(Activity* target) {
     return true;
 }
 
+static bool isStale(Activity* a) {
+    if (!ParcelExists(a->parcelID)) return true;
+    if (GetParcelStatus(a->parcelID) != a->newStatus) return true;
+    if (a->activityType == "ASSIGN_RESOURCE" &&
+        !resourceHeldByParcel(a->resourceID, a->parcelID)) return true;
+    return false;
+}
+
 // undo newest activity
 bool undoLastActivity() {
+    while (!isStackEmpty() && isStale(stackTop)) {
+        cout << "Skipping activity #" << stackTop->activityID
+             << ": it can no longer be reversed." << endl;
+        stackTop->reversible = false;
+        popStack();
+    }
     if (isStackEmpty()) {
         cout << "No activity history available to undo." << endl;
         return false;
@@ -438,6 +562,120 @@ bool undoActivityByID(int activityID) {
         return false;
     }
     return undoActivity(target);
+}
+
+//for saving activities to file
+// save every activity in the log to a text file
+bool saveActivitiesToFile(const string& filename) {
+    ofstream out(filename);
+    if (!out.is_open()) {
+        cout << "Unable to open '" << filename << "' for writing." << endl;
+        return false;
+    }
+
+    out << nextActivityID << endl;
+    for (Activity* c = logHead; c != nullptr; c = c->nextActivity) {
+        out << c->activityID << '|' << c->parcelID << '|' << c->activityType << '|'
+            << c->previousStatus << '|' << c->newStatus << '|' << c->requestID << '|'
+            << c->previousRequestStatus << '|' << c->newRequestStatus << '|'
+            << c->resourceID << '|' << c->timestamp << '|'
+            << c->reversible << '|' << c->reversed << endl;
+    }
+    out.close();
+
+    cout << "Saved " << logCount << " activity record(s) to '" << filename << "'." << endl;
+    return true;
+}
+
+// load activities from the text file, then rebuild the log and the stack
+bool loadActivitiesFromFile(const string& filename) {
+    ifstream in(filename);
+    if (!in.is_open()) {
+        return false;
+    }
+
+    string line;
+    if (!getline(in, line)) {
+        return false;
+    }
+
+    int savedNextActivityID = 1;
+
+    try {
+        savedNextActivityID = stoi(line);
+    }
+    catch (...) {
+        savedNextActivityID = 1;
+    }
+
+    logHead = logTail = nullptr;
+    stackTop = nullptr;
+    logCount = 0;
+    int highestID = 0;
+
+    while (getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+
+        stringstream ss(line);
+        string f[12];
+        bool ok = true;
+        for (int i = 0; i < 12; i++) {
+            if (!getline(ss, f[i], '|')) {
+                ok = false;
+                break;
+            }
+        }
+        if (!ok) continue;
+
+        Activity* node = new Activity;
+        try {
+            node->activityID = stoi(f[0]);
+            node->parcelID = stoi(f[1]);
+        } catch (...) {
+            delete node;
+            continue;
+        }
+        node->activityType = f[2];
+        node->previousStatus = f[3];
+        node->newStatus = f[4];
+        node->requestID = f[5];
+        node->previousRequestStatus = f[6];
+        node->newRequestStatus = f[7];
+        node->resourceID = f[8];
+        node->timestamp = f[9];
+        node->reversible = (f[10] == "1");
+        node->reversed = (f[11] == "1");
+        node->nextActivity = nullptr;
+        node->stackNext = nullptr;
+
+        if (logHead == nullptr) {
+            logHead = logTail = node;
+        } else {
+            logTail->nextActivity = node;
+            logTail = node;
+        }
+        logCount++;
+        if (node->activityID > highestID) highestID = node->activityID;
+    }
+    in.close();
+
+    nextActivityID = savedNextActivityID;
+
+    if (nextActivityID <= highestID) {
+        nextActivityID = highestID + 1;
+    }
+
+    // rebuild the undo stack: oldest to newest, so the newest ends on top
+    for (Activity* c = logHead; c != nullptr; c = c->nextActivity) {
+        if (c->reversible && !c->reversed) {
+            pushStack(c);
+        }
+    }
+
+    cout << "Loaded " << logCount << " activity record(s) from '" << filename << "'." << endl;
+    return true;
 }
 
 // Main menu for task 4
