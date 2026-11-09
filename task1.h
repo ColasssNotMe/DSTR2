@@ -36,9 +36,10 @@ extern Queue toBeDelivered;
 extern Queue toBeCollectParcel;
 extern Queue returnedParcel;
 extern Queue onHoldInvestigaton;
+extern Queue collectedParcel;
 
 // Array containing pointers to all parcel queues
-extern Queue *allQueue[6];
+extern Queue *allQueue[7];
 
 // Result array
 extern Parcel result[500];
@@ -50,6 +51,7 @@ void enqueue(Parcel parcel, Queue &queue);
 void dequeue(Queue &queue);
 bool removeParcel(Queue &queue, int parcelID);
 Queue *findParcelQueue(int parcelID);
+bool isParcelCollected(int parcelID);
 
 // Question 1: Register and serve parcels
 void registerNewParcel(std::string recipientName, std::string recipientID,

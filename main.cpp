@@ -74,6 +74,12 @@ void option1Menu() {
   cout << string(50, '=') << endl;
   displayAllParcel(returnedParcel);
   cout << endl << endl;
+
+  cout << string(50, '=') << endl;
+  cout << "Collected Parcel" << endl;
+  cout << string(50, '=') << endl;
+  displayAllParcel(collectedParcel);
+  cout << endl << endl;
 }
 
 void option2Menu() {
@@ -147,6 +153,12 @@ void option6Menu() {
   Queue *parcelQueue = findParcelQueue(parcelID);
   if (parcelQueue == nullptr) {
     cout << "Parcel with ID " << parcelID << " not found." << endl;
+    return;
+  }
+
+  if (isParcelCollected(parcelID)) {
+    cout << "Parcel " << parcelID
+         << " has already been collected and cannot be deleted." << endl;
     return;
   }
 

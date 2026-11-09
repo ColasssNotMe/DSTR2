@@ -54,6 +54,9 @@ static Queue* getQueueByStatus(const string& status) {
     if (status == "Return to Sender" || status == "Return") {
         return &returnedParcel;
     }
+    if (status == "Collected") {
+        return &collectedParcel;
+    }
     return &normalParcels;
 }
 
