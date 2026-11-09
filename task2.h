@@ -39,4 +39,6 @@ ServiceRequest* getNextRequest();
 void processServiceRequest(int requestID, string newStatus);
 void cancelServiceRequest(int requestID);
 
+
+void saveRequestsToFile(const string& filename = "service_requests.txt");
 #endif // TASK2_H

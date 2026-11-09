@@ -222,6 +222,7 @@ void option7Menu() {
     cout << "3. Determine & View Next Request to Handle" << endl;
     cout << "4. Process Service Request (Complete)" << endl;
     cout << "5. Cancel Service Request" << endl;
+    cout << "6. Save Active Service Requests to File" << endl;
     cout << "0. Back to Main Menu" << endl;
 
     cout << "Enter selection: ";
@@ -261,6 +262,10 @@ void option7Menu() {
       cancelServiceRequest(reqID);
       break;
     }
+    case 6: {
+    saveRequestsToFile("service_requests.txt");
+    break;
+}
     case 0:
       return;
     default:
