@@ -111,7 +111,8 @@ void option2Menu() {
 
   string searchTerm;
   cout << "Enter search term to be searched: ";
-  cin >> searchTerm;
+  cin.ignore();
+  getline(cin, searchTerm);
 
   searchAllMatchingParcel(searchTerm, searchSelection);
 }
