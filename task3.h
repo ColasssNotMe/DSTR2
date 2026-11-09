@@ -46,7 +46,6 @@ Resource* getResourceOfParcel(int parcelID);
 
 // Q1
 bool registerNewResource(std::string type);
-void seedResources();
 
 // Q2
 void printResource(Resource* resource);
@@ -65,5 +64,10 @@ int releaseParcelResource(std::string resourceID);
 bool setResourceOccupied(std::string resourceID);
 bool setResourceUnavailable(std::string resourceID);
 bool setResourceAvailable(std::string resourceID);
+
+//store dt
+void saveResources();
+void loadResources();
+void seedResources();
 
 #endif

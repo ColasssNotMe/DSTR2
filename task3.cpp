@@ -1,6 +1,6 @@
-
 #include "task3.h"
 #include <iostream>
+#include <fstream>          // ===== ADDED =====
 
 using namespace std;
 
@@ -20,6 +20,59 @@ ResourceQueue* allResourceQueue[2] = {
     &counterData,
     &deliveryData
 };
+
+// ===== ADDED: SAVE / LOAD =====
+void saveResources() {
+    ofstream out("resources.txt");
+    if (!out.is_open()) {
+        cout << "Could not save resources." << endl;
+        return;
+    }
+    for (int q = 0; q < 2; q++) {
+        ResourceQueue* queue = allResourceQueue[q];
+        for (int i = 0; i < queue->count; i++) {
+            int position = (queue->front + i) % MAX_RESOURCE;
+            Resource* r = queue->resources[position];
+            if (r == nullptr) continue;
+            out << r->resourceID << " "
+                << r->type << " "
+                << r->status << " "
+                << r->parcelID << " "
+                << r->receiptID << "\n";
+        }
+    }
+    out.close();
+}
+
+void loadResources() {
+    ifstream in("resources.txt");
+    if (!in.is_open()) return;      // first run: no file yet
+
+    string id, type, status;
+    int parcelID, receiptID;
+
+    while (in >> id >> type >> status >> parcelID >> receiptID) {
+        Resource* r = new Resource;
+        r->resourceID = id;
+        r->type = type;
+        r->status = status;
+        r->parcelID = parcelID;
+        r->receiptID = receiptID;
+
+        if (type == "Counter") {
+            if (enqueueResource(r, counterQueue)) {
+                int num = stoi(id.substr(1));
+                if (num >= nextCounterNumber) nextCounterNumber = num + 1;
+            } else { delete r; }
+        } else if (type == "Delivery") {
+            if (enqueueResource(r, deliveryQueue)) {
+                int num = stoi(id.substr(1));
+                if (num >= nextDeliveryNumber) nextDeliveryNumber = num + 1;
+            } else { delete r; }
+        } else { delete r; }
+    }
+    in.close();
+}
 
 
 // check 
@@ -187,6 +240,7 @@ bool registerNewResource(string type) {
         cout << "Resource registered successfully." << endl;
         cout << "Resource ID: " << resourceID << endl;
 
+        saveResources();
         return true;
     }
 
@@ -276,6 +330,7 @@ string assignParcelToResource(int parcelID, string resourceID) {
     resource->parcelID = parcelID;
     resource->receiptID = 0;
 
+    saveResources(); 
     return "Parcel assigned successfully to " + resourceID;
 }
 
@@ -297,6 +352,7 @@ string assignReceiptToResource(int receiptID, string resourceID) {
     resource->parcelID = 0;
     resource->receiptID = receiptID;
 
+    saveResources();
     return "Receipt assigned successfully to " + resourceID;
 }
 
@@ -341,8 +397,6 @@ void assignReceiptMenu() {
 }
 
 
-
-
 // q4
 int releaseParcelResource(string resourceID) {
 
@@ -366,6 +420,7 @@ int releaseParcelResource(string resourceID) {
 
     cout << "Resource released successfully." << endl;
 
+    saveResources();
     return parcelID;
 }
 
@@ -393,6 +448,7 @@ bool setResourceOccupied(string resourceID) {
 
     cout << "Resource set to occupied." << endl;
 
+    saveResources();
     return true;
 }
 
@@ -420,6 +476,7 @@ bool setResourceUnavailable(string resourceID) {
 
     cout << "Resource set to unavailable." << endl;
 
+    saveResources();
     return true;
 }
 
@@ -448,21 +505,22 @@ bool setResourceAvailable(string resourceID) {
 
     cout << "Resource is now available." << endl;
 
+    saveResources();
     return true;
 }
 
 
-// // Add initial resources
-// void seedResources() {
+// Add initial resources dt prevent error
+void seedResources() {
 
-//     if (counterQueue->count == 0 &&
-//         deliveryQueue->count == 0) {
+    if (counterQueue->count == 0 &&
+        deliveryQueue->count == 0) {
 
-//         registerNewResource("Counter");
-//         registerNewResource("Counter");
-//         registerNewResource("Delivery");
-//         registerNewResource("Delivery");
+        registerNewResource("Counter");
+        registerNewResource("Counter");
+        registerNewResource("Delivery");
+        registerNewResource("Delivery");
 
-//         cout << "\nInitial resources loaded.\n";
-//     }
-// }
+        cout << "\nInitial resources loaded.\n";
+    }
+}

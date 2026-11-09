@@ -358,6 +358,7 @@ void optionResource6() {
 
     setResourceAvailable(resourceID);
 }
+
 void optionResource7() {
     string resourceID;
 
@@ -386,6 +387,13 @@ void option8Menu() {
 
         cout << "Enter selection: ";
         cin >> selection;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input.\n";
+            continue;
+        }
 
         switch (selection) {
         case 1:
@@ -429,6 +437,10 @@ void menu() {
     seedInitialData();
   }
 
+  loadResources();
+  if (isResourceQueueEmpty(counterQueue) && isResourceQueueEmpty(deliveryQueue)) {
+      seedResources();  
+  }
 
   while (true) {
     cout << endl << endl;
