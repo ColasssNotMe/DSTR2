@@ -157,7 +157,7 @@ void option6Menu() {
     return;
   }
 
-  string prevStatus = GetParcelStatus(parcelID);  
+  string prevStatus = GetParcelStatus(parcelID);
 
   if (isParcelCollected(parcelID)) {
     cout << "Parcel " << parcelID
@@ -252,7 +252,7 @@ void option7Menu() {
       displayActiveRequests();
       break;
     case 3: {
-      ServiceRequest* nextReq = getNextRequest();
+      ServiceRequest *nextReq = getNextRequest();
       if (nextReq != nullptr) {
         cout << "\n--- NEXT REQUEST TO PROCESS (Highest Priority) ---\n";
         cout << "Request ID : " << nextReq->requestID << endl;
@@ -279,9 +279,9 @@ void option7Menu() {
       break;
     }
     case 6: {
-    saveRequestsToFile("service_requests.txt");
-    break;
-}
+      saveRequestsToFile("service_requests.txt");
+      break;
+    }
     case 0:
       return;
     default:
@@ -294,175 +294,174 @@ void option7Menu() {
 // ================= TASK 3 =================
 
 void optionResource1() {
-    int choice;
+  int choice;
 
-    cout << "\n========== Register Resource ==========\n";
-    cout << "1. Counter\n";
-    cout << "2. Delivery\n";
-    cout << "0. Back\n";
+  cout << "\n========== Register Resource ==========\n";
+  cout << "1. Counter\n";
+  cout << "2. Delivery\n";
+  cout << "0. Back\n";
 
-    cout << "Enter selection: ";
-    cin >> choice;
+  cout << "Enter selection: ";
+  cin >> choice;
 
-    if (choice == 1) {
-        registerNewResource("Counter");
-    }
-    else if (choice == 2) {
-        registerNewResource("Delivery");
-    }
-    else if (choice == 0) {
-        return;
-    }
-    else {
-        cout << "Invalid selection.\n";
-    }
+  if (choice == 1) {
+    registerNewResource("Counter");
+  } else if (choice == 2) {
+    registerNewResource("Delivery");
+  } else if (choice == 0) {
+    return;
+  } else {
+    cout << "Invalid selection.\n";
+  }
 }
 
 void optionResource2() {
-    cout << "\n========== Resource Availability ==========\n";
-    displayAllResources();
+  cout << "\n========== Resource Availability ==========\n";
+  displayAllResources();
 }
 
 void optionResource3() {
-    int choice;
+  int choice;
 
-    cout << "\n========== ASSIGN RESOURCE ==========\n";
-    cout << "1. Assign Parcel" << endl;
-    cout << "2. Assign Receipt" << endl;
-    cout << "0. Back" << endl;
+  cout << "\n========== ASSIGN RESOURCE ==========\n";
+  cout << "1. Assign Parcel" << endl;
+  cout << "2. Assign Receipt" << endl;
+  cout << "0. Back" << endl;
 
-    cout << "Enter selection: ";
-    cin >> choice;
+  cout << "Enter selection: ";
+  cin >> choice;
 
-    switch (choice) {
-    case 1:
-        assignParcelMenu();
-        break;
-    case 2:
-        assignReceiptMenu();
-        break;
-    case 0:
-        return;
-    default:
-        cout << "Invalid selection." << endl;
-        break;
-    }
+  switch (choice) {
+  case 1:
+    assignParcelMenu();
+    break;
+  case 2:
+    assignReceiptMenu();
+    break;
+  case 0:
+    return;
+  default:
+    cout << "Invalid selection." << endl;
+    break;
+  }
 }
 
 void optionResource4() {
-    string resourceID;
+  string resourceID;
 
-    cout << "\nEnter Resource ID to release: ";
-    cin >> resourceID;
+  cout << "\nEnter Resource ID to release: ";
+  cin >> resourceID;
 
-    int parcelID = releaseParcelResource(resourceID);
+  int parcelID = releaseParcelResource(resourceID);
 
-    if (parcelID != 0) {
-        cout << "Parcel " << parcelID << " released.\n";
-    }
+  if (parcelID != 0) {
+    cout << "Parcel " << parcelID << " released.\n";
+  }
 }
 
 void optionResource5() {
-    string resourceID;
+  string resourceID;
 
-    cout << "\nEnter Resource ID: ";
-    cin >> resourceID;
+  cout << "\nEnter Resource ID: ";
+  cin >> resourceID;
 
-    setResourceUnavailable(resourceID);
+  setResourceUnavailable(resourceID);
 }
 
 void optionResource6() {
-    string resourceID;
+  string resourceID;
 
-    cout << "\nEnter Resource ID: ";
-    cin >> resourceID;
+  cout << "\nEnter Resource ID: ";
+  cin >> resourceID;
 
-    setResourceAvailable(resourceID);
+  setResourceAvailable(resourceID);
 }
 
 void optionResource7() {
-    string resourceID;
+  string resourceID;
 
-    cout << "\nEnter Resource ID: ";
-    cin >> resourceID;
+  cout << "\nEnter Resource ID: ";
+  cin >> resourceID;
 
-    setResourceOccupied(resourceID);
+  setResourceOccupied(resourceID);
 }
 
 void option8Menu() {
-    int selection;
+  int selection;
 
-    while (true) {
-        cout << "\n" << string(40, '=') << endl;
-        cout << "Resource Management" << endl;
-        cout << string(40, '=') << endl;
+  while (true) {
+    cout << "\n" << string(40, '=') << endl;
+    cout << "Resource Management" << endl;
+    cout << string(40, '=') << endl;
 
-        cout << "1. Register New Resource" << endl;
-        cout << "2. Display All Resources" << endl;
-        cout << "3. Assign Parcel to Resource" << endl;
-        cout << "4. Release Resource" << endl;
-        cout << "5. Set Resource Unavailable" << endl;
-        cout << "6. Set Resource Available" << endl;
-        cout << "7. Set Resource Occupied" << endl;
-        cout << "0. Back to Main Menu" << endl;
+    cout << "1. Register New Resource" << endl;
+    cout << "2. Display All Resources" << endl;
+    cout << "3. Assign Parcel to Resource" << endl;
+    cout << "4. Release Resource" << endl;
+    cout << "5. Set Resource Unavailable" << endl;
+    cout << "6. Set Resource Available" << endl;
+    cout << "7. Set Resource Occupied" << endl;
+    cout << "0. Back to Main Menu" << endl;
 
-        cout << "Enter selection: ";
-        cin >> selection;
+    cout << "Enter selection: ";
+    cin >> selection;
 
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Invalid input.\n";
-            continue;
-        }
-
-        switch (selection) {
-        case 1:
-            optionResource1();
-            break;
-        case 2:
-            optionResource2();
-            break;
-        case 3:
-            optionResource3();
-            break;
-        case 4:
-            optionResource4();
-            break;
-        case 5:
-            optionResource5();
-            break;
-        case 6:
-            optionResource6();
-            break;
-        case 7:
-            optionResource7();
-            break;
-        case 0:
-            return;
-        default:
-            cout << "Invalid selection. Please try again.\n";
-            break;
-        }
+    if (cin.fail()) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "Invalid input.\n";
+      continue;
     }
+
+    switch (selection) {
+    case 1:
+      optionResource1();
+      break;
+    case 2:
+      optionResource2();
+      break;
+    case 3:
+      optionResource3();
+      break;
+    case 4:
+      optionResource4();
+      break;
+    case 5:
+      optionResource5();
+      break;
+    case 6:
+      optionResource6();
+      break;
+    case 7:
+      optionResource7();
+      break;
+    case 0:
+      return;
+    default:
+      cout << "Invalid selection. Please try again.\n";
+      break;
+    }
+  }
 }
 
 void seedInitialData() {
-  registerNewParcel("Alice Tan", "TP012345", "DHL", "Box", "2026-11-05 08:00", "");
-  registerNewParcel("Bob Lee", "TP067890", "FedEx", "Document", "2026-11-05 08:30", "");
+  registerNewParcel("Alice Tan", "2001", "DHL", "Box", "2026-11-05 08:00", "");
+  registerNewParcel("Bob Lee", "2002", "FedEx", "Document", "2026-11-05 08:30",
+                    "");
   cout << "[SYSTEM] Preloaded 2 initial parcels (ID 1001 & 1002).\n\n";
 }
 
 void menu() {
   if (!loadParcelsFromFile()) {
     seedInitialData();
-  } 
+  }
 
   loadActivitiesFromFile();
 
   loadResources();
-  if (isResourceQueueEmpty(counterQueue) && isResourceQueueEmpty(deliveryQueue)) {
-      seedResources();  
+  if (isResourceQueueEmpty(counterQueue) &&
+      isResourceQueueEmpty(deliveryQueue)) {
+    seedResources();
   }
 
   while (true) {

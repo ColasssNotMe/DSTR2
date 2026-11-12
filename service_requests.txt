@@ -1,3 +1,0 @@
-Req ID    Parcel ID   Recipient Name      Service Type          Priority    Date/Time           Status        
---------------------------------------------------------------------------------------------------------------
-2001      1001        Alice Tan           Special Handling      1           2026-11-09 2:39     Pending       
